@@ -35,6 +35,9 @@ C_FILES += xsh_arp.c xsh_nc.c xsh_netdown.c xsh_netemu.c xsh_netstat.c xsh_netup
 # Turtle Graphics commands
 C_FILES += xsh_turtle.c
 
+# kmux commands
+C_FILES += xsh_kmux.c
+
 # Flash commands
 C_FILES += xsh_flashstat.c
 

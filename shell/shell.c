@@ -42,6 +42,9 @@ const struct centry commandtab[] = {
     {"kexec", FALSE, xsh_kexec},
 #endif
     {"kill", TRUE, xsh_kill},
+#if FRAMEBUF
+    {"kmux", FALSE, xsh_kmux},
+#endif
 #ifdef GPIO_BASE
     {"led", FALSE, xsh_led},
 #endif

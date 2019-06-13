@@ -8,7 +8,9 @@
 #include <stddef.h>
 #include <framebuffer.h>
 #include <stdlib.h>
-#include <shell.h> /* for banner */
+#include <shell.h>
+#include <pane.h>
+#include <thread.h>
 #include <kernel.h>
 #include "../../system/platforms/arm-rpi3/bcm2837_mbox.h"
 
@@ -148,6 +150,14 @@ void screenClear(ulong color) {
 		*address = color;
 		address++;
 	}
+
+#ifdef FRAMEBUF
+	if (strcmp(thrtab[*thrcurrent].name, "PANE", 4) == 0 && (strcmp(thrtab[*thrcurrent].name, "KMUX", 4) == 0)) {
+		drawPanelName(thrtab[*thrcurrent].name, 11);
+	}
+
+//	drawPanelName(thrtab[*thrcurrent].name, 11);
+#endif
 }
 
 /* Clear the minishell window */

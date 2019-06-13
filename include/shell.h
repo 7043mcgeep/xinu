@@ -110,6 +110,7 @@ shellcmd xsh_gpiostat(int, char *[]);
 shellcmd xsh_help(int, char *[]);
 shellcmd xsh_kexec(int, char *[]);
 shellcmd xsh_kill(int, char *[]);
+shellcmd xsh_kmux(int, char *[]);
 shellcmd xsh_led(int, char *[]);
 shellcmd xsh_memdump(int, char *[]);
 shellcmd xsh_memstat(int, char *[]);
