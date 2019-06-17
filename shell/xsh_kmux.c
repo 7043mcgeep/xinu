@@ -3,6 +3,7 @@
  *
  */
 
+#include <xinu.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +11,8 @@
 #include <tty.h>
 #include <string.h>
 #include <shell.h>
-#include <framebuffer.h>
 #include <device.h>
+#include <framebuffer.h>
 #include <pane.h>
 
 /**
@@ -108,7 +109,11 @@ shellcmd xsh_kmux(int nargs, char *args[])
 			for (i = 0; i < MAXPANES; i++) {
 				printf("%d\t\t%s\t\t%d\n", panetab[i].id, panetab[i].name, panetab[i].state);
 			}
+			continue;
 		}
+
+		/* If we made it here, we have no idea what this command is. */
+		printf("Sorry, %s is not a recognized command. Check syntax and help menu.", tok[0]);
 
 		return OK;
 

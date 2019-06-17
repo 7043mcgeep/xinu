@@ -152,7 +152,7 @@ void screenClear(ulong color) {
 	}
 
 #ifdef FRAMEBUF
-	if (strcmp(thrtab[*thrcurrent].name, "PANE", 4) == 0 && (strcmp(thrtab[*thrcurrent].name, "KMUX", 4) == 0)) {
+	if (strncmp(thrtab[*thrcurrent].name, "PANE", 4) == 0 && (strncmp(thrtab[*thrcurrent].name, "KMUX", 4) == 0)) {
 		drawPanelName(thrtab[*thrcurrent].name, 11);
 	}
 

@@ -7,8 +7,10 @@
 #ifndef _FRAMEBUFFER_H_
 #define _FRAMEBUFFER_H_
 
+#include <xinu.h>
 #include <device.h>
 #include <stddef.h>
+
 
 extern volatile unsigned int mbox[36];
 int mbox_call(unsigned char);
@@ -166,7 +168,7 @@ extern struct newcommand newcommandtab[];
 
 /* driver functions */
 devcall fbWrite(device *, const uchar *, uint);
-devcall fbPutc(device *, char);
+devcall fbPutc(device *devptr, char ch);
 syscall fbprintf(char *fmt, ...);
 
 /* other function prototypes */

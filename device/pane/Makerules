@@ -1,12 +1,11 @@
-# This Makefile contains rules to build this directory.
+# This Makefile contains rules to build files in this directory.
 
 # Name of this component (the directory this file is stored in)
-COMP = apps
+COMP = device/pane
 
 # Source files for this component
-C_FILES = date.c rdate.c timeserver.c
-
 S_FILES =
+C_FILES = frame.c pane.c pAlloc.c pClose.c pInit.c pOpen.c pPutc.c pWrite.c
 
 # Add the files to the compile source path
 DIR = ${TOPDIR}/${COMP}

@@ -1,6 +1,8 @@
 /**
  * @file	pane.c
  */
+
+#include <xinu.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,8 +10,8 @@
 #include <tty.h>
 #include <string.h>
 #include <shell.h>
-#include <framebuffer.h>
 #include <device.h>
+#include <framebuffer.h>
 #include <pane.h>
 
 /* Global variables */
