@@ -8,11 +8,11 @@
 
 #define MAXPANES 4	/* maximum of 4 panes in the panebox */
 
-devcall pInit(device *devptr);
+int pInit(device *devptr);
 devcall pOpen(device *devptr);
 devcall pClose(device *devptr);
 devcall pWrite(device *devptr);
-devcall pPutc(device *devptr);
+devcall pPutc(device *devptr, char ch);
 
 void spawnPane(void);							/* Create a pane and place it into the panetab */
 void killPane(char *name);							/* Remove a pane from the panetab */
@@ -23,6 +23,7 @@ void drawPanelName(char *name, int length);
 struct pane {
 	int id;		/* ID of pane in panebox*/
 	int state;	/* PANE_* below */
+	int init;	/* initalized T/F */
 	char name[11];	/* name of pane */
 	int xpos;	/* Upper left corner x position of pane */
 	int ypos;	/* Upper left corner y position of pane */

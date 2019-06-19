@@ -13,6 +13,13 @@
 #include <device.h>
 #include <pane.h>
 
-devcall pInit(device *devptr) {
-	
+int pInit(device *devptr) {
+	int i;
+	for (i = 0; i < MAXPANES; i++) {
+		if (strcmp(panetab[i].name, devptr->name) == 0) {
+			panetab[i].state = PANE_FREE;
+			return OK;
+		}
+	}
+	return OK;	
 }
