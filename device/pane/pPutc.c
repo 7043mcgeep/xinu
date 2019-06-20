@@ -35,7 +35,7 @@ devcall pPutc(device *devptr, char ch) {
 		}
 		drawChar(ch, cursor_col * CHAR_WIDTH, cursor_row * CHAR_HEIGHT, foreground);
 		cursor_col++;
-		if (cursor_call == cols) {
+		if (cursor_col == cols) {
 			cursor_col = 0;
 			cursor_row += 1;
 		}

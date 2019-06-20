@@ -5,13 +5,17 @@
 
 #ifndef _PANE_H
 #define _PANE_H	
+#include <semaphore.h>
+
 
 #define MAXPANES 4	/* maximum of 4 panes in the panebox */
+#define PANEPRIO 100	/* priority of poutproc */
 
 int pInit(device *devptr);
-devcall pOpen(device *devptr);
+//int pFree(struct pane *ppane);
+devcall pOpen(device *devptr, va_list ap);
 devcall pClose(device *devptr);
-devcall pWrite(device *devptr);
+devcall pWrite(device *devptr, unsigned char *buf, int len);
 devcall pPutc(device *devptr, char ch);
 
 void spawnPane(void);							/* Create a pane and place it into the panetab */
@@ -21,12 +25,35 @@ void drawPane(int id, int width, int height, int posx, int posy);	/* Draw a pane
 void drawPanelName(char *name, int length);
 
 struct pane {
-	int id;		/* ID of pane in panebox*/
-	int state;	/* PANE_* below */
-	int init;	/* initalized T/F */
-	char name[11];	/* name of pane */
-	int xpos;	/* Upper left corner x position of pane */
-	int ypos;	/* Upper left corner y position of pane */
+	device	*devptr;	/* pane dev structure 		*/
+	int id;			/* ID of pane in panebox	*/
+	int state;		/* PANE_* below 		*/
+	int init;		/* initalized T/F 		*/
+	char name[11];		/* name of pane 		*/
+
+	int ul_row;		/* upper left absolute row 	*/
+	int ul_col;		/* upper left absolute col 	*/
+	int lr_row;		/* lower right absolute row 	*/
+	int lr_col;		/* lower right absolute col 	*/
+
+	int rows;		/* effective pane height 	*/
+	int cols;		/* effective pane width 	*/
+	int cursrow;		/* current relative cursor 	*/
+	int curscol;		/* location in rows and cols 	*/
+
+	int fg;			/* pane foreground color 	*/
+	int bg;			/* pane background color 	*/
+
+	/* output fields */
+	semaphore p_outsem;	/* output buffer space semaphor */
+	int p_ohead;		/* index of first character	*/
+	int p_otail;		/* index of last character 	*/
+	int p_ocount;		/* # characters in output buffer*/
+	int p_olimit;		/* max size of output buffer 	*/
+	char* p_outbuf;		/* buffer (dynamically alloted) */
+	int p_olowat;		/* buffer low water mark (delay)*/
+	int p_odsend;		/* # sends delayed for space 	*/
+	int outprocid; 		/* process id of output process	*/
 };
 
 /* PANE states */
@@ -36,7 +63,18 @@ struct pane {
 #define PANE_NULL	2	/* Used when creating the NULL pane for default use of fbPutc when kmux is not */
 				/* being used */
 				/* Number of used panes */
+int pFree(struct pane *ppane);
+
 extern struct pane panetab[MAXPANES];
 extern int panecount;
-//struct pane panetab[MAXPANES];	/* Table keeping track of panes */
+
+/* PANE locations */
+
+#define PANE0_ULROW	0
+#define PANE0_ULCOL	0
+#define PANE0_LRROW	DEFAULT_HEIGHT / 2
+#define PANE0_LRCOL
+
+
+
 #endif /* _PANE_H */

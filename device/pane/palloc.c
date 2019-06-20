@@ -16,17 +16,17 @@
 #include <pane.h>
 
 struct pane *palloc(void) {
-	struct pane newpane;
+	struct pane *ppane;
 	int i;
 
 	for (i = 0; i < MAXPANES; i++) {
 		if (panetab[i].state == PANE_FREE) {
 			char name[6] = "PANE";
 			sprintf(name, "%s%d", name, i);
-			strcpy(newpane.name, name);
-			newpane.id = i;
-			newpane.state = PANE_USED;
-			panetab[i] = newpane;
+			strcpy(ppane->name, name);
+			ppane->id = i;
+			ppane->state = PANE_USED;
+			panetab[i] = *ppane;
 			return (&panetab[i]);
 		}
 	}
