@@ -19,11 +19,13 @@ devcall pClose(device *devptr) {
 	struct pane *ppane = NULL;
 	int outpid = -1;
 
+	ppane = (struct pane *)devptr;
 	ppane->devptr = 0;
 	semfree(ppane->p_outsem);
 	ppane->p_outsem = -1;
-	freemem(ppane->p_outbuf);
+	memfree(ppane->p_outbuf, sizeof(ppane->p_outbuf));
 	kill(ppane->outprocid);
 	pFree(ppane);
+	devptr = (char *)NULL;
 	return OK;
 }

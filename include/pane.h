@@ -16,7 +16,8 @@ int pInit(device *devptr);
 devcall pOpen(device *devptr, va_list ap);
 devcall pClose(device *devptr);
 devcall pWrite(device *devptr, unsigned char *buf, int len);
-devcall pPutc(device *devptr, char ch);
+devcall pPutc(device *devptr, unsigned char ch);
+devcall pControl(device *devptr, int func, char *arg1, char *arg2);
 
 void spawnPane(void);							/* Create a pane and place it into the panetab */
 void killPane(char *name);							/* Remove a pane from the panetab */
@@ -70,11 +71,53 @@ extern int panecount;
 
 /* PANE locations */
 
-#define PANE0_ULROW	0
-#define PANE0_ULCOL	0
-#define PANE0_LRROW	DEFAULT_HEIGHT / 2
-#define PANE0_LRCOL
+/* 2 PANE configuration */
+#define TWO_PANE0_ULROW		0
+#define TWO_PANE0_ULCOL		0
+#define TWO_PANE0_LRROW		DEFAULT_HEIGHT - 1
+#define TWO_PANE0_LRCOL		DEFAULT_WIDTH / 2
 
+#define TWO_PANE1_ULROW		0
+#define TWO_PANE1_ULCOL		DEFAULT_WIDTH / 2
+#define TWO_PANE1_LRROW		DEFAULT_HEIGHT - 1
+#define TWO_PANE1_LRCOL		DEFAULT_WIDTH - 1
+
+/* 3 PANE configuration */
+#define THR_PANE0_ULROW		0
+#define THR_PANE0_ULCOL		0
+#define THR_PANE0_LRROW		DEFAULT_HEIGHT / 2
+#define THR_PANE0_LRCOL		DEFAULT_WIDTH / 2 
+
+#define THR_PANE1_ULROW		DEFAULT_HEIGHT / 2
+#define THR_PANE1_ULCOL		0
+#define THR_PANE1_LRROW		DEFAULT_HEIGHT - 1
+#define THR_PANE1_LRCOL		DEFAULT_WIDTH / 2
+
+#define THR_PANE2_ULROW		0
+#define THR_PANE2_ULCOL 	DEFAULT_WIDTH / 2
+#define THR_PANE2_LRROW		DEFAULT_HEIGHT - 1
+#define THR_PANE2_LRCOL		DEFAULT_WIDTH - 1
+
+/* 4 PANE configuration */
+#define FOR_PANE0_ULROW		0
+#define FOR_PANE0_ULCOL		0
+#define FOR_PANE0_LRROW		DEFAULT_HEIGHT / 2
+#define FOR_PANE0_LRCOL		DEFAULT_WIDTH / 2
+
+#define FOR_PANE1_ULROW		0
+#define FOR_PANE1_ULCOL		DEFAULT_WIDTH / 2
+#define FOR_PANE1_LRROW		DEFAULT_HEIGHT - 1
+#define FOR_PANE1_LRCOL		DEFAULT_WIDTH - 1
+
+#define FOR_PANE2_ULROW		DEFAULT_HEIGHT / 2
+#define FOR_PANE2_ULCOL		DEFAULT_WIDTH / 2
+#define FOR_PANE2_LRROW		DEFAULT_HEIGHT - 1
+#define FOR_PANE2_LRCOL		DEFAULT_WIDTH - 1
+
+#define FOR_PANE3_ULROW		DEFAULT_HEIGHT / 2
+#define FOR_PANE3_ULCOL		0
+#define FOR_PANE3_LRROW		DEFAULT_HEIGHT - 1
+#define FOR_PANE3_LRCOL		DEFAULT_WIDTH / 2
 
 
 #endif /* _PANE_H */

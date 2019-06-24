@@ -33,22 +33,25 @@
 #define PANE2Y	0
 
 /* kmux function prototypes */
+/* DEPRECATED */
 void new(void);
 void split(void);
 void startShell(void);
-void join(void);			/* new version needs paneid */
+void join(void);
+
 void help(void);
+void openPanes(int);
+void closePanes(void);
 
 /* kmux built-in commands */
 struct defaultcommand builtInCommands[] = {
-	{"new", new},
-	{"split", split},
-	{"join", join}
+	{"open", openPanes},
+	{"close", closePanes}
 	
 };
 
 /* global variables used by xsh_kmux */
-int panecnt = 1;	/* number of current panes */
+int panecnt = 0;	/* number of current panes */
 
 
 shellcmd xsh_kmux(int nargs, char *args[])
@@ -81,24 +84,15 @@ shellcmd xsh_kmux(int nargs, char *args[])
 		}
 
 		//split command
-		else if ((0 == strcmp(tok[0], "split")) && (ntok == 1)) {
-		//	printf("split!\n");
-		//	startShell();
-			split();
-			panecnt++;
+		else if ((0 == strcmp(tok[0], "open")) && (ntok == 2)) {
+			openPanes(atoi(tok[1]));
+		//	printf("Opened %d windows\n", atoi(tok[1]));
 			return OK;
 		}
 
 		//join command 
-		else if ((0 == strcmp(tok[0], "join")) && (ntok == 2)) {
-		//	printf("joined!\n");	
-			killPane(tok[1]);	//2nd argument is pane NAME
-			return OK;
-		}
-		
-		//new command
-		else if ((0 == strcmp(tok[0], "new")) && (ntok == 1)) {
-			new();
+		else if ((0 == strcmp(tok[0], "close")) && (ntok == 1)) {
+			closePanes();
 			return OK;
 		}
 
@@ -120,13 +114,7 @@ shellcmd xsh_kmux(int nargs, char *args[])
 	}
 }
 
-void new() {
-	spawnFrame();
-}
 
-void split() {
-	spawnPane();
-}
 
 void startShell() {
 	if (panecnt < MAXPANES) {
@@ -204,6 +192,41 @@ void join() {	/* new version needs paneid */
 	printf("Unable to destroy SHELL process!\n");
 */
 }
+
+void openPanes(int num) {
+	if (num == 2) {
+		drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
+		drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
+
+		if (OK == open(PANE1, TTY1)) {
+
+			ready(create((void *)shell, INITSTK, INITPRIO, "PANE1", 3, TTY1, PANE1, PANE1), RESCHED_NO);
+		}
+
+		if (OK == open(PANE2, TTY1)) {
+			ready(create((void *)shell, INITSTK, INITPRIO, "PANE2", 3, TTY1, PANE2, PANE2), RESCHED_NO);
+		}
+	}
+
+	else if (num == 3) {
+		drawRect(THR_PANE0_ULCOL, THR_PANE0_ULROW, THR_PANE0_LRCOL, THR_PANE0_LRROW, LEAFGREEN);
+		drawRect(THR_PANE1_ULCOL, THR_PANE1_ULROW, THR_PANE1_LRCOL, THR_PANE1_LRROW, LEAFGREEN);
+		drawRect(THR_PANE2_ULCOL, THR_PANE2_ULROW, THR_PANE2_LRCOL, THR_PANE2_LRROW, LEAFGREEN);
+	
+	}
+	else if (num == 4) {				
+		drawRect(FOR_PANE0_ULCOL, FOR_PANE0_ULROW, FOR_PANE0_LRCOL, FOR_PANE0_LRROW, LEAFGREEN);
+		drawRect(FOR_PANE1_ULCOL, FOR_PANE1_ULROW, FOR_PANE1_LRCOL, FOR_PANE1_LRROW, LEAFGREEN);
+		drawRect(FOR_PANE2_ULCOL, FOR_PANE2_ULROW, FOR_PANE2_LRCOL, FOR_PANE2_LRROW, LEAFGREEN);
+		drawRect(FOR_PANE3_ULCOL, FOR_PANE3_ULROW, FOR_PANE3_LRCOL, FOR_PANE3_LRROW, LEAFGREEN);
+	}
+}
+
+void closePanes() {
+
+}
+
+
 
 
 #endif /* FRAMEBUF */

@@ -52,7 +52,10 @@ devcall pOpen(device *devptr, va_list ap) {
 	ppane = palloc();	/* allocate new pane from table */
 	if ((struct pane *)SYSERR == ppane)
 		return SYSERR;
+	
+//	devptr = (device *)ppane;	/* dev table entry points to win */
 
+	ppane->devptr = devptr;
 	ppane->ul_row	= ulrow;
 	ppane->ul_col	= ulcol;
 	ppane->lr_row	= lrrow;

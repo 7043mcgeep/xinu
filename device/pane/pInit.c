@@ -23,6 +23,7 @@ int pInit(device *devptr) {
 	}
 	return OK;
 */
+//	devptr = (char *)0; 	/* in case Xinu restarts.*/
 	panetab[devptr->minor].state = PANE_FREE;
 	return OK;	
 }

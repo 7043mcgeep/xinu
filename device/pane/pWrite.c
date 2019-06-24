@@ -10,7 +10,7 @@ static int writcopy(unsigned char *buf, struct pane *ppane, int avail, int len);
 
 
 devcall pWrite(device *devptr, unsigned char *buf, int len) {
-	struct pane *ppane; // = (struct win *)pdev->dvioblk;
+	struct pane *ppane = (struct pane *)devptr; // = (struct win *)pdev->dvioblk;
 	irqmask	im;
 	int avail;
 
