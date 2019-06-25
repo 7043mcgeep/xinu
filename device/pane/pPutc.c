@@ -52,7 +52,7 @@ devcall pPutc(device *devptr, unsigned char ch) {
 	}
 	return SYSERR;
 */
-	return pWrite(devptr, &ch, 1);
+	return pWrite(devptr, ch, 1);
 
 
 }

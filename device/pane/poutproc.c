@@ -21,6 +21,21 @@ int poutproc(struct pane *ppane) {
 	char c;
 
 
+	drawChar('+', ppane->ul_col, ppane->ul_row, ppane->fg);
+	drawChar('+', ppane->ul_col, ppane->lr_row, ppane->fg);
+	drawChar('+', ppane->lr_col, ppane->ul_row, ppane->fg);
+	drawChar('+', ppane->lr_col, ppane->lr_row, ppane->fg);
+
+	for (count = ppane->ul_col + 1; count < ppane->lr_col; count++) {
+		drawChar('-', ppane->ul_col, count, ppane->fg);
+		drawChar('-', ppane->lr_col, count, ppane->fg);
+	}
+	for (count = ppane->ul_row + 1; count < ppane->lr_row; count++) {
+		drawChar('|', count, ppane->ul_row, ppane->fg);
+		drawChar('|', count, ppane->lr_row, ppane->fg);
+	}
+
+
 	im = disable();
 	while(1) {
 		if ( (count = ppane->p_ocount) > 0) {	/* if there are chars to output */

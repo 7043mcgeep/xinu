@@ -26,7 +26,7 @@ void drawPane(int id, int width, int height, int posx, int posy);	/* Draw a pane
 void drawPanelName(char *name, int length);
 
 struct pane {
-	device	*devptr;	/* pane dev structure 		*/
+	device *devptr;		/* pane dev structure 		*/
 	int id;			/* ID of pane in panebox	*/
 	int state;		/* PANE_* below 		*/
 	int init;		/* initalized T/F 		*/

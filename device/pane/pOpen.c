@@ -55,7 +55,9 @@ devcall pOpen(device *devptr, va_list ap) {
 	
 //	devptr = (device *)ppane;	/* dev table entry points to win */
 
-	ppane->devptr = devptr;
+	devptr = (device *)ppane;
+
+	ppane->devptr	= devptr;
 	ppane->ul_row	= ulrow;
 	ppane->ul_col	= ulcol;
 	ppane->lr_row	= lrrow;

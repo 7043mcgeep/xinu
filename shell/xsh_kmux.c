@@ -43,6 +43,10 @@ void help(void);
 void openPanes(int);
 void closePanes(void);
 
+/* testing */
+void outproc0(void);
+void outproc1(char *text, int fg, int pane);
+
 /* kmux built-in commands */
 struct defaultcommand builtInCommands[] = {
 	{"open", openPanes},
@@ -193,19 +197,77 @@ void join() {	/* new version needs paneid */
 */
 }
 
+
+void outproc0() {
+	enable();
+
+//	drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
+	
+//	open(TTY1, PANE0);
+	open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, WHITE, MAGENTA);
+//	ready(create(shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+
+	while(1);
+
+}
+
+void outproc1(char *text, int fg, int pane) {
+	char *str = NULL;
+	int count = 0; 
+	int fd = 0;
+
+	enable();
+
+	str = (char *)memget(256);
+
+	if ((char *)SYSERR == str)
+		return;
+
+	fd = pane + 1;
+		
+//	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
+	
+//	open(TTY1, PANE1);
+	open(fd, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, CYAN);
+//	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+
+	while(1) {
+		sprintf(str, "Process %d says %s\n", gettid(), text);
+		write(fd, str, strlen(str));
+		sleep(10 * pane);
+	}
+}
+
+
 void openPanes(int num) {
 	if (num == 2) {
+
+/*
 		drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
 		drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
 
-		if (OK == open(PANE1, TTY1)) {
-
-			ready(create((void *)shell, INITSTK, INITPRIO, "PANE1", 3, TTY1, PANE1, PANE1), RESCHED_NO);
+		if (OK == open(CONSOLE, TTY1)) {
+			
+			ready(create(shell, INITSTK, INITPRIO, "PANE1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+			
 		}
 
-		if (OK == open(PANE2, TTY1)) {
-			ready(create((void *)shell, INITSTK, INITPRIO, "PANE2", 3, TTY1, PANE2, PANE2), RESCHED_NO);
+		if (OK == open(PANE2, CONSOLE2)) {
+			
+			ready(create(shell, INITSTK, INITPRIO, "PANE2", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+			
 		}
+*/
+		
+		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", BLUE, 0), RESCHED_NO);
+		
+		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", GREEN, 0), RESCHED_NO);
+	
+		
+
+		
+		
+
 	}
 
 	else if (num == 3) {

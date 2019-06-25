@@ -19,7 +19,8 @@ devcall pClose(device *devptr) {
 	struct pane *ppane = NULL;
 	int outpid = -1;
 
-	ppane = (struct pane *)devptr;
+	ppane = &panetab[devptr->minor];
+
 	ppane->devptr = 0;
 	semfree(ppane->p_outsem);
 	ppane->p_outsem = -1;
