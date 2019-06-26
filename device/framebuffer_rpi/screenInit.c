@@ -150,14 +150,8 @@ void screenClear(ulong color) {
 		*address = color;
 		address++;
 	}
-
-#ifdef FRAMEBUF
-	if (strncmp(thrtab[*thrcurrent].name, "PANE", 4) == 0 && (strncmp(thrtab[*thrcurrent].name, "KMUX", 4) == 0)) {
-		drawPanelName(thrtab[*thrcurrent].name, 11);
-	}
-
-//	drawPanelName(thrtab[*thrcurrent].name, 11);
-#endif
+	cursor_row = 0;
+	cursor_col = 0;	
 }
 
 /* Clear the minishell window */

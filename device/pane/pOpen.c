@@ -53,9 +53,13 @@ devcall pOpen(device *devptr, va_list ap) {
 	if ((struct pane *)SYSERR == ppane)
 		return SYSERR;
 	
-//	devptr = (device *)ppane;	/* dev table entry points to win */
+//	devptr = (device *)ppane;	/* dev table entry points to pane */
 
-	devptr = (device *)ppane;
+//	devptr = (device *)ppane;
+//	devtab[devptr->minor] = ppane;
+	
+//	devtab[devptr->minor].devptr = devptr;
+//	devptr = (device *)ppane;
 
 	ppane->devptr	= devptr;
 	ppane->ul_row	= ulrow;
@@ -74,6 +78,10 @@ devcall pOpen(device *devptr, va_list ap) {
 
 	ppane->p_olimit = ppane->rows * ppane->cols;
 	ppane->p_outsem = semcreate(ppane->p_olimit);
+
+
+	
+
 	
 	if ((semaphore)SYSERR == ppane->p_outsem) {
 		return SYSERR;
@@ -90,14 +98,18 @@ devcall pOpen(device *devptr, va_list ap) {
 		return SYSERR;
 	}
 
-	outpid = create(poutproc, INITSTK, PANEPRIO, "*PANEOUT*", 1);
+//	devptr = (device *)ppane;
+
+	outpid = create(poutproc, INITSTK, PANEPRIO, "*PANEOUT*", 1, ppane);
 	
 	if (SYSERR == outpid) {
 		kprintf("Cannot create pane output process.\n");
 	} else {
 		ppane->outprocid = outpid;
-		ready(outpid, RESCHED_NO);
+		ready(outpid, RESCHED_YES);
 	}
+	
+	devptr = (device *)ppane;
 	return ppane;
 
 }

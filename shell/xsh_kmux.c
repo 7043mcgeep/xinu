@@ -44,9 +44,10 @@ void openPanes(int);
 void closePanes(void);
 
 /* testing */
-void outproc0(void);
+void outproc0(char *text, int fg, int pane);
 void outproc1(char *text, int fg, int pane);
-
+void soutproc0(void);
+void soutproc1(void);
 /* kmux built-in commands */
 struct defaultcommand builtInCommands[] = {
 	{"open", openPanes},
@@ -198,16 +199,31 @@ void join() {	/* new version needs paneid */
 }
 
 
-void outproc0() {
+void outproc0(char *text, int fg, int pane) {
+	char *str = NULL;
+	int count = 0;
+	int fd = 0;
+	
 	enable();
+
+	str = (char *)memget(256);
+
+	if ((char *)SYSERR == str)
+		return;
+
+	fd = pane + 1;
 
 //	drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
 	
 //	open(TTY1, PANE0);
-	open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, WHITE, MAGENTA);
+	open(PANE0, THR_PANE0_ULROW, THR_PANE0_ULCOL, THR_PANE0_LRROW, THR_PANE0_LRCOL, fg, MAGENTA);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, TTY1, TTY1), RESCHED_NO);
 
-	while(1);
+	while(1) {
+		sprintf(str, "Process %d says %s\n", gettid(), text);
+		write(PANE0, str, strlen(str));
+		sleep(10);
+	}
 
 }
 
@@ -228,15 +244,60 @@ void outproc1(char *text, int fg, int pane) {
 //	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
 	
 //	open(TTY1, PANE1);
-	open(fd, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, CYAN);
+	open(PANE1, THR_PANE1_ULROW, THR_PANE1_ULCOL, THR_PANE1_LRROW, THR_PANE1_LRCOL, fg, CYAN);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
 
-	while(1) {
+	while(1)  {
 		sprintf(str, "Process %d says %s\n", gettid(), text);
-		write(fd, str, strlen(str));
-		sleep(10 * pane);
+		write(PANE1, str, strlen(str));
+		sleep(10);
 	}
 }
+
+void outproc2(char *text, int fg, int pane) {
+	char *str = NULL;
+	int count = 0; 
+	int fd = 0;
+
+	enable();
+
+	str = (char *)memget(256);
+
+	if ((char *)SYSERR == str)
+		return;
+
+	fd = pane + 1;
+		
+//	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
+	
+//	open(TTY1, PANE1);
+	open(PANE2, THR_PANE2_ULROW, THR_PANE2_ULCOL, THR_PANE2_LRROW, THR_PANE2_LRCOL, fg, CYAN);
+//	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+
+	while(1)  {
+		sprintf(str, "Process %d says %s\n", gettid(), text);
+		write(PANE2, str, strlen(str));
+		sleep(10);
+	}
+}
+
+void soutproc0() {
+//	open(PANE0, TTY1);
+
+	open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, WHITE, BLACK);
+	open(TTY1, PANE0);
+	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, PANE0, PANE0), RESCHED_NO);
+
+}
+
+void soutproc1() {
+//	open(PANE1, TTY1);
+
+	open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);
+	open(TTY1, PANE1);
+	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, PANE1, PANE1), RESCHED_NO);
+}
+
 
 
 void openPanes(int num) {
@@ -258,22 +319,39 @@ void openPanes(int num) {
 			
 		}
 */
-		
-		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", BLUE, 0), RESCHED_NO);
-		
-		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", GREEN, 0), RESCHED_NO);
-	
-		
+/*
+		kill(26);
 
+		screenClear(BLACK);	
+		ready(create((void *)outproc0, INITSTK, 20, "outproc0", 3, "AAA", MAGENTA, 1), RESCHED_YES);
+		ready(create((void *)outproc1, INITSTK, 20, "outproc1", 3, "BBB", CYAN, 1), RESCHED_YES);
+
+*/		
+//		open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, CYAN, BLACK);	
+//		open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, MAGENTA, BLACK);
+	
+
+		
+		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
+		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
 		
 		
 
 	}
 
 	else if (num == 3) {
+/*
 		drawRect(THR_PANE0_ULCOL, THR_PANE0_ULROW, THR_PANE0_LRCOL, THR_PANE0_LRROW, LEAFGREEN);
 		drawRect(THR_PANE1_ULCOL, THR_PANE1_ULROW, THR_PANE1_LRCOL, THR_PANE1_LRROW, LEAFGREEN);
 		drawRect(THR_PANE2_ULCOL, THR_PANE2_ULROW, THR_PANE2_LRCOL, THR_PANE2_LRROW, LEAFGREEN);
+*/
+		kill(26);
+
+		screenClear(BLACK);
+		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", MAGENTA, 1), RESCHED_YES);
+		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", CYAN, 1), RESCHED_YES);
+		ready(create((void *)outproc2, INITSTK, 10, "outproc2", 3, "CCC", ORANGE, 1), RESCHED_YES);
+
 	
 	}
 	else if (num == 4) {				

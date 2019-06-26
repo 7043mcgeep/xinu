@@ -20,7 +20,7 @@ int poutproc(struct pane *ppane) {
 	irqmask im;
 	char c;
 
-
+/*
 	drawChar('+', ppane->ul_col, ppane->ul_row, ppane->fg);
 	drawChar('+', ppane->ul_col, ppane->lr_row, ppane->fg);
 	drawChar('+', ppane->lr_col, ppane->ul_row, ppane->fg);
@@ -32,12 +32,30 @@ int poutproc(struct pane *ppane) {
 	}
 	for (count = ppane->ul_row + 1; count < ppane->lr_row; count++) {
 		drawChar('|', count, ppane->ul_row, ppane->fg);
-		drawChar('|', count, ppane->lr_row, ppane->fg);
-	}
+		drawChar('|', count, ppane->lr_row, ppane->fg);	}
 
-
+*/
 	im = disable();
 	while(1) {
+		/* Draw pane outline */
+		drawRect(ppane->ul_col, ppane->ul_row, ppane->lr_col, ppane->lr_row, LEAFGREEN);
+
+		/* Draw pane name box outline */
+		drawRect(ppane->ul_col, ppane->lr_row - 15, ppane->lr_col, ppane->lr_row, LEAFGREEN);
+	
+		/* Draw thread name in box */
+		char name[6];
+		strcpy(name, ppane->devptr->name);
+		int i, x, y;
+		x = ppane->ul_col + 1;
+		y = ppane->lr_row - CHAR_HEIGHT;
+		for (i = 0; i < sizeof(name)/sizeof(char); i++) {
+			drawChar(name[i], x, y, CYAN);
+			x += CHAR_WIDTH;
+		} 
+
+	
+		
 		if ( (count = ppane->p_ocount) > 0) {	/* if there are chars to output */
 			c = ppane->p_outbuf[ppane->p_ohead++];
 			ppane->p_ocount--;
@@ -58,17 +76,21 @@ int poutproc(struct pane *ppane) {
 			}
 			restore(im);
 			if ('\n' == c) {
-				for (c = ppane->curscol; c < ppane->cols; c++) {
-					drawChar(' ', ppane->ul_row + ppane->cursrow + 1,
-						ppane->ul_col + c + 1, ppane->fg);
+				/*
+				for (c = ppane->cursrow; c < ppane->rows; c++) {
+					drawChar(' ', ppane->ul_col + ppane->curscol + 1,
+						ppane->ul_row + c + , ppane->fg);
 				}
+				*/
+				ppane->curscol = ppane->ul_col;
+				ppane->cursrow += CHAR_HEIGHT + 2;
 			}
 			else {
-				drawChar(c, ppane->ul_row + ppane->cursrow + 1,
-					ppane->ul_col + ppane->curscol + 1,
+				drawChar(c, ppane->ul_col + ppane->curscol + 1,
+					ppane->ul_row + ppane->cursrow + 1,
 					ppane->fg);
 			}
-			ppane->curscol++;
+			ppane->curscol += CHAR_WIDTH;
 			if (ppane->curscol >= ppane->cols) {
 				ppane->curscol = 0;
 				ppane->cursrow++;

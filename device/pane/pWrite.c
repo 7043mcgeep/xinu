@@ -6,12 +6,11 @@
 #include <device.h>
 #include <pane.h>
 
-static int writcopy(unsigned char *buf, struct pane *ppane, int avail, int len);
+static int writcopy(char *buf, struct pane *ppane, int avail, int len);
 
 
-devcall pWrite(device *devptr, unsigned char *buf, int len) {
-	struct pane *ppane = NULL; // = (struct win *)pdev->dvioblk;
-	ppane = &panetab[devptr->minor];	
+devcall pWrite(device *devptr, char *buf, int len) {
+	struct pane *ppane = &panetab[devptr->minor];	
 
 	irqmask	im;
 	int avail;
@@ -29,25 +28,34 @@ devcall pWrite(device *devptr, unsigned char *buf, int len) {
 
 	if (avail >= len) {
 		writcopy(buf, ppane, avail, len);
-		/* wake output process */
-		send(ppane->outprocid, 0);
-		buf += avail;
-		len -= avail;
+		/* Wake output process */
+		send(ppane->outprocid, len);
 	}
+	else {
 
-	for (; len > 0; len--) {
-		wait(ppane->p_outsem);
-		ppane->p_outbuf[ppane->p_otail++] = *buf++;
-		++ppane->p_ocount;
-		if (ppane->p_otail >= ppane->p_olimit) {
-			ppane->p_otail = 0;
+
+		if (avail >= len) {
+			writcopy(buf, ppane, avail, len);
+			/* wake output process */
+			send(ppane->outprocid, 0);
+			buf += avail;
+			len -= avail;
+		}
+
+		for (; len > 0; len--) {
+			wait(ppane->p_outsem);
+			ppane->p_outbuf[ppane->p_otail++] = *buf++;
+			++ppane->p_ocount;
+			if (ppane->p_otail >= ppane->p_olimit) {
+				ppane->p_otail = 0;
+			}
 		}
 	}
 	restore(im);
 	return len;
 }
 
-static int writcopy(unsigned char *buf, struct pane *ppane, int avail, int len) {
+static int writcopy(char *buf, struct pane *ppane, int avail, int len) {
 	int index, count;
 	char *qhead;
 	

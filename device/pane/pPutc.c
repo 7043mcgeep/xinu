@@ -24,7 +24,7 @@ extern bool initalized;
  * @param  devptr  pointer to pane device
  * @param  ch    character to write
  */
-devcall pPutc(device *devptr, unsigned char ch) {
+devcall pPutc(device *devptr, char ch) {
 /*
 	if (devptr->init == TRUE) {
 		if (ch == '\n') {
