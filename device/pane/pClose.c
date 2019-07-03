@@ -25,6 +25,7 @@ devcall pClose(device *devptr) {
 	semfree(ppane->p_outsem);
 	ppane->p_outsem = -1;
 	memfree(ppane->p_outbuf, sizeof(ppane->p_outbuf));
+	ppane->p_outbuf = -1;
 	kill(ppane->outprocid);
 	pFree(ppane);
 	devptr = (char *)NULL;

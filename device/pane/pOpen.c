@@ -24,6 +24,9 @@ extern int poutproc(struct pane *ppane);
 devcall pOpen(device *devptr, va_list ap) {
 	int ulrow, ulcol, lrrow, lrcol, fg, bg;
 	int outpid = -1;
+	int dvnum = KBDMON0;
+	
+
 
 	struct pane *ppane = NULL;
 	
@@ -76,6 +79,24 @@ devcall pOpen(device *devptr, va_list ap) {
 	ppane->fg	= fg;
 	ppane->bg	= bg;
 
+	
+
+	/* initialize input buffer */
+	ppane->istart = 0;
+	ppane->icount = 0;
+	ppane->idelim = FALSE;
+
+	/* initalize input flags */
+	ppane->iflags = TTY_ICRNL;
+	ppane->ieof = FALSE;
+	
+	ppane->phw = (device *)&devtab[dvnum];
+
+
+
+
+
+
 	ppane->p_olimit = ppane->rows * ppane->cols;
 	ppane->p_outsem = semcreate(ppane->p_olimit);
 
@@ -106,7 +127,7 @@ devcall pOpen(device *devptr, va_list ap) {
 		kprintf("Cannot create pane output process.\n");
 	} else {
 		ppane->outprocid = outpid;
-		ready(outpid, RESCHED_YES);
+		ready(outpid, RESCHED_NO);
 	}
 	
 	devptr = (device *)ppane;

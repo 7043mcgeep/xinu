@@ -22,7 +22,7 @@ devcall pWrite(device *devptr, char *buf, int len) {
 	if (ppane == NULL)
 		return SYSERR;
 
-	im = disable();		/* disable interrupts */
+//	im = disable();		/* disable interrupts */
 
 	avail = semcount(ppane->p_outsem);
 
@@ -34,7 +34,7 @@ devcall pWrite(device *devptr, char *buf, int len) {
 	else {
 
 
-		if (avail >= len) {
+		if (avail > 0) {
 			writcopy(buf, ppane, avail, len);
 			/* wake output process */
 			send(ppane->outprocid, 0);
@@ -51,7 +51,7 @@ devcall pWrite(device *devptr, char *buf, int len) {
 			}
 		}
 	}
-	restore(im);
+//	restore(im);
 	return len;
 }
 
