@@ -14,6 +14,7 @@
  *-------------------------------------------------------------------
  */
 
+void clearBackground(struct pane *ppane);
 
 int poutproc(struct pane *ppane) {
 	int count;
@@ -38,18 +39,13 @@ int poutproc(struct pane *ppane) {
 //	im = disable();
 
 	/* draw pane background */
-	int x, y;
-	for (x = ppane->ul_col; x < ppane->lr_col; x++) {
-		for (y = ppane->ul_row; y < ppane->lr_row; y++) {
-			drawPixel(x, y, ppane->bg);
-		}
-	}
+	clearBackground(ppane);
 
 
-//	im = disable();
+	im = disable();
 //	kprintf("off top");
 	while(1) {
-		kprintf("at the top");
+//		kprintf("at the top");
 		/* Draw pane outline */
 		drawRect(ppane->ul_col, ppane->ul_row, ppane->lr_col, ppane->lr_row, LEAFGREEN);
 	
@@ -59,7 +55,7 @@ int poutproc(struct pane *ppane) {
 		/* Draw thread name in box */
 		char name[6];
 		strcpy(name, ppane->devptr->name);
-		int i;
+		int i, x, y;
 		x = ppane->ul_col + 1;
 		y = ppane->lr_row - CHAR_HEIGHT;
 		for (i = 0; i < sizeof(name)/sizeof(char); i++) {
@@ -71,28 +67,31 @@ int poutproc(struct pane *ppane) {
 		if ( (count = ppane->p_ocount) > 0) {	/* if there are chars to output */
 			c = ppane->p_outbuf[ppane->p_ohead++];
 			ppane->p_ocount--;
+			kprintf("ocount: %d\n", ppane->p_ocount);
 			if (ppane->p_ohead >= ppane->p_olimit) {
 				ppane->p_ohead = 0;
 			}
 
 			/* if buffer level below low water mark and no delayed signal waiting proc now */
 			if ( (count < (ppane->p_olimit - ppane->p_olowat) ) && (0 == ppane->p_odsend) ) {
+//				kprintf("hello ");
+//				ppane->p_ocount++;
 				signal(ppane->p_outsem);
 //				restore(im);
-				kprintf("Hello");
+//				kprintf("Hello");
 			}
 			/* else delay signal until at least OBMINSP buffer slots are free */
 			else if ( ++(ppane->p_odsend) == ppane->p_olowat) {
-				kprintf("got here");
+//				kprintf("woop ");
 				while (ppane->p_odsend > 0) {
-					kprintf("hola1");
+//					kprintf("hola1");
 					ppane->p_odsend--;
 					signal(ppane->p_outsem);
-					kprintf("hola2");
+//					kprintf("hola2");
 				}
 			}
-			kprintf("got here 2");
-//			restore(im);
+//			kprintf("got here 2");
+			restore(im);
 		//	kprintf("on middle");
 			if ('\n' == c) {
 				/*
@@ -103,32 +102,42 @@ int poutproc(struct pane *ppane) {
 				*/
 				ppane->curscol = ppane->ul_col;
 				ppane->cursrow += CHAR_HEIGHT + 2;
-				kprintf("newline");
+//				kprintf("newline");
 			}
 			else {
 				drawChar(c, ppane->ul_col + ppane->curscol + 1,
 					ppane->ul_row + ppane->cursrow + 1,
 					ppane->fg);
-				kprintf("regular");
+//				kprintf("regular");
 			}
 			ppane->curscol += CHAR_WIDTH;
 			if (ppane->curscol >= ppane->cols) {
 				ppane->curscol = 0;
-				ppane->cursrow++;
+				ppane->cursrow += CHAR_HEIGHT + 2;
 			}
 			
-			if (ppane->cursrow >= ppane->rows) {
+			if (ppane->cursrow >= ppane->rows - 15) {
+				clearBackground(ppane);
 				ppane->cursrow = 0;
 			}
-//			im = disable();
+			im = disable();
 //			kprintf("off bottom");
-			kprintf("continue");
+//			kprintf("continue");
 			continue;
 	
 		}
 //		restore(im);
 //		kprintf("on bottom");	
 		receive();
-		kprintf("received");
+//		kprintf("received");
+	}
+}
+
+void clearBackground(struct pane *ppane) {
+	int x, y; 
+	for (x = ppane->ul_col; x < ppane->lr_col; x++) {
+		for (y = ppane->ul_row; y < ppane->lr_row; y++) {
+			drawPixel(x, y, ppane->bg);
+		}
 	}
 }

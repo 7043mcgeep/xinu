@@ -97,7 +97,7 @@ devcall pOpen(device *devptr, va_list ap) {
 
 
 
-	ppane->p_olimit = ppane->rows * ppane->cols;
+	ppane->p_olimit = ppane->cols;	/* buffer output limit is the length of one line of the pane */ 
 	ppane->p_outsem = semcreate(ppane->p_olimit);
 
 

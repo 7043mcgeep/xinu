@@ -22,36 +22,48 @@ devcall pWrite(device *devptr, char *buf, int len) {
 	if (ppane == NULL)
 		return SYSERR;
 
-//	im = disable();		/* disable interrupts */
+	im = disable();		/* disable interrupts */
 
 	avail = semcount(ppane->p_outsem);
 
 	if (avail >= len) {
+	//	im = disable();
+	//	kprintf("hello");
 		writcopy(buf, ppane, avail, len);
 		/* Wake output process */
 		send(ppane->outprocid, len);
+	//	kprintf("goodbye");
+	//	restore(im);
 	}
 	else {
 
 
 		if (avail > 0) {
+	//		im = disable();
+		//	kprintf("hola");
 			writcopy(buf, ppane, avail, len);
 			/* wake output process */
-			send(ppane->outprocid, 0);
+			send(ppane->outprocid, avail);
 			buf += avail;
 			len -= avail;
+	//		kprintf("adios");
+	//		restore(im);
 		}
-
-		for (; len > 0; len--) {
+		
+		for ( ; len > 0; len--) {
+	//		im = disable();
+	//		kprintf("ping!");
 			wait(ppane->p_outsem);
 			ppane->p_outbuf[ppane->p_otail++] = *buf++;
 			++ppane->p_ocount;
 			if (ppane->p_otail >= ppane->p_olimit) {
 				ppane->p_otail = 0;
 			}
+	//		kprintf("pong");
+	//		restore(im);
 		}
 	}
-//	restore(im);
+	restore(im);
 	return len;
 }
 
@@ -63,6 +75,7 @@ static int writcopy(char *buf, struct pane *ppane, int avail, int len) {
 	qhead = &ppane->p_outbuf[index];
 	
 	for (count = len; count > 0; count--) {
+//		kprintf("loop %d", count);
 		*qhead++ = *buf++;
 		if (++index >= ppane->p_olimit) {
 			index = 0;

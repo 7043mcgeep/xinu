@@ -9,7 +9,7 @@
 
 
 #define MAXPANES 4	/* maximum of 4 panes in the panebox */
-#define PANEPRIO 50	/* priority of poutproc */
+#define PANEPRIO 100	/* priority of poutproc */
 
 int pInit(device *devptr);
 //int pFree(struct pane *ppane);
@@ -18,12 +18,30 @@ devcall pClose(device *devptr);
 devcall pWrite(device *devptr, char *buf, int len);
 devcall pPutc(device *devptr, char ch);
 devcall pControl(device *devptr, int func, char *arg1, char *arg2);
+devcall pGetc(device *devptr);
+devcall pRead(device *devptr, void *buf, int len);
 
 void spawnPane(void);							/* Create a pane and place it into the panetab */
 void killPane(char *name);							/* Remove a pane from the panetab */
 void spawnFrame(void);							/* Spawn the frame shell process */
 void drawPane(int id, int width, int height, int posx, int posy);	/* Draw a pane on the screen */	
 void drawPanelName(char *name, int length);
+
+/* output definitions */
+#define OBLEN		256	/* output buffer size */
+#define OBMINSP		32	/* low water mark for outbuffer */
+
+
+/* input flags */
+
+#define PANE_IBLEN	1024	/* input buffer length		*/
+#define PANE_IRAW	0x01	/* read unbuffered and uncooked	*/
+#define PANE_INLCR	0x02	/* convert '\n' to '\r'		*/
+#define PANE_IGNCR	0x04	/* ignore '\r' on input		*/
+#define PANE_ICRNL	0x08	/* convert '\r' to '\n'		*/
+#define PANE_ECHO	0x10	/* echo input			*/
+#define PANE_IALL (PANE_IRAW | PANE_INCLR | PANE_IGNCR | PANE_ICRNL | PANE_ECHO)
+
 
 struct pane {
 	device *devptr;		/* pane dev structure 		*/
@@ -55,6 +73,15 @@ struct pane {
 	int p_olowat;		/* buffer low water mark (delay)*/
 	int p_odsend;		/* # sends delayed for space 	*/
 	int outprocid; 		/* process id of output process	*/
+
+	/* input fields */
+	char iflags;		/* input flags, PANE_I* above	*/
+	bool ieof;		/* EOF read			*/
+	bool idelim;		/* partial line in buffer	*/
+	char in[PANE_IBLEN];	/* input buffer 		*/
+	int istart;		/* index of first char in buffer*/
+	int icount;		/* number of chars in buffer 	*/
+	device *phw;		/* hardware device structure	*/
 };
 
 /* PANE states */

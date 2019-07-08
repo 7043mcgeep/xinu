@@ -242,7 +242,7 @@ static int sysinit(void)
 #endif
 
 #if NETHER
-	netInit();
+//	netInit();
 #endif
 
 #if GPIO

@@ -14,6 +14,7 @@
 #include <device.h>
 #include <framebuffer.h>
 #include <pane.h>
+#include <mutex.h>
 
 /**
  * Shell command (split). Splits the screen and spawns a new shell window until ended
@@ -26,26 +27,17 @@
 
 #if FRAMEBUF	/* Don't include if no framebuffer exists */
 
-/* Fixed pane locations */
-#define PANE1X	0
-#define	PANE1Y	0
-#define	PANE2X	(DEFAULT_WIDTH / 2)
-#define PANE2Y	0
-
 /* kmux function prototypes */
-/* DEPRECATED */
-void new(void);
-void split(void);
-void startShell(void);
-void join(void);
 
 void help(void);
 void openPanes(int);
 void closePanes(void);
 
+
 /* testing */
-void outproc0(char *text, int fg, int pane);
-void outproc1(char *text, int fg, int pane);
+void outproc0(char *text, int fg, int bg, int pane);
+void outproc1(char *text, int fg, int bg, int pane);
+void outproc2(char *text, int fg, int bg, int pane);
 void soutproc0(void);
 void soutproc1(void);
 /* kmux built-in commands */
@@ -57,6 +49,7 @@ struct defaultcommand builtInCommands[] = {
 
 /* global variables used by xsh_kmux */
 int panecnt = 0;	/* number of current panes */
+mutex_t frame_lock;
 
 
 shellcmd xsh_kmux(int nargs, char *args[])
@@ -66,6 +59,7 @@ shellcmd xsh_kmux(int nargs, char *args[])
 	char tokbuf[SHELL_BUFLEN + SHELL_MAXTOK];	/* token value buffer */
 	short ntok;			/* number of tokens */
 	char *tok[SHELL_MAXTOK];	/* pointers to token values */	
+	frame_lock = mutex_create();
 
 	/* Constantly receive and process input */
 	while(TRUE) {
@@ -121,92 +115,15 @@ shellcmd xsh_kmux(int nargs, char *args[])
 
 
 
-void startShell() {
-	if (panecnt < MAXPANES) {
-		switch(panecnt) {
 
-			case 0:		ready(create(shell, INITSTK, INITPRIO, "PANE1", 3, TTY1, TTY1, TTY1), RESCHED_NO); 
-				//	screenInit();
-					panecnt++;
-					while(1);
-					break;
-		
-			case 1: 	ready(create(shell, INITSTK, INITPRIO, "PANE2", 3, TTY1, TTY1, TTY1), RESCHED_NO);
-				//	screenInit();
-					panecnt++;
-					while(1);
-					break;
-
-			case 2: 	ready(create(shell, INITSTK, INITPRIO, "PANE3", 3, TTY1, TTY1, TTY1), RESCHED_NO);
-				//	screenInit(); 
-					panecnt++;
-					while(1);
-					break;
-
-			case 3:		ready(create(shell, INITSTK, INITPRIO, "PANE4", 3, TTY1, TTY1, TTY1), RESCHED_NO);
-				//	screenInit();
-					panecnt++;
-					while(1);
-					break;
-		}
-	}
-	else {
-		printf("Maximum number of panes spawned!\n");
-	}	
-
-
-
-//	ready(create((void *)shell, INITSTK, INITPRIO, "SHELL2", 3, CONSOLE, CONSOLE, CONSOLE), RESCHED_YES);
-//	open(TTY1, KBDMON0);
-//	screenInit();
-}
-
-
-void join() {	/* new version needs paneid */
-	struct thrent *thrptr;	/* pointer to thread entry */
-	int i;
-/*
-	for (i = 0; i < NTHREAD; i++) {
-		thrptr = &thrtab[i];
-		if (strcmp(thrptr->name, "SHELL2") == 0) {
-			kill(i)
-		}
-	} */
-
-/*
-	for (i = 0; i < NTHREAD; i++) {
-		thrptr = &thrtab[i];
-		if (strcmp(thrptr->name, "SHELL2") == 0) {
-			kill(i);
-			panecnt--;
-			return;
-		} else if (strcmp(thrptr->name, "SHELL3") == 0) {
-			kill(i);
-			panecnt--;
-			return;
-		} else if (strcmp(thrptr->name, "SHELL4") == 0) {
-			kill(i);
-			panecnt--;
-			return;
-		} else if (strcmp(thrptr->name, "SHELL5") == 0) {
-			kill(i);
-			panecnt--;
-			return;
-		}
-	}
-	printf("Unable to destroy SHELL process!\n");
-*/
-}
-
-
-void outproc0(char *text, int fg, int pane) {
-	char *str = NULL;
+void outproc0(char *text, int fg, int bg, int pane) {
+	char str[25];
 	int count = 0;
 	int fd = 0;
 	
-	enable();
+//	enable();
 
-	str = (char *)memget(256);
+//	str = (char *)memget(256);
 
 	if ((char *)SYSERR == str)
 		return;
@@ -216,25 +133,27 @@ void outproc0(char *text, int fg, int pane) {
 //	drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
 	
 //	open(TTY1, PANE0);
-	open(PANE0, THR_PANE0_ULROW, THR_PANE0_ULCOL, THR_PANE0_LRROW, THR_PANE0_LRCOL, fg, MAGENTA);
+	open(PANE0, THR_PANE0_ULROW, THR_PANE0_ULCOL, THR_PANE0_LRROW, THR_PANE0_LRCOL, fg, bg);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, TTY1, TTY1), RESCHED_NO);
 
 	while(1) {
-		sprintf(str, "Process %d says %s\n", gettid(), text);
+		sprintf(str, "Process %d says %s jfaiowejfoawjefojawiofjoawijfoiaewjiofjowijfoiwjfoiajwoifjawiof\n", gettid(), text);
+//		mutex_acquire(frame_lock);
 		write(PANE0, str, strlen(str));
-		sleep(10);
+//		mutex_release(frame_lock);
+		
 	}
 
 }
 
-void outproc1(char *text, int fg, int pane) {
-	char *str = NULL;
+void outproc1(char *text, int fg, int bg, int pane) {
+	char str[25];
 	int count = 0; 
 	int fd = 0;
 
-	enable();
+//	enable();
 
-	str = (char *)memget(256);
+//	str = (char *)memget(256);
 
 	if ((char *)SYSERR == str)
 		return;
@@ -244,24 +163,27 @@ void outproc1(char *text, int fg, int pane) {
 //	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
 	
 //	open(TTY1, PANE1);
-	open(PANE1, THR_PANE1_ULROW, THR_PANE1_ULCOL, THR_PANE1_LRROW, THR_PANE1_LRCOL, fg, CYAN);
+	open(PANE1, THR_PANE1_ULROW, THR_PANE1_ULCOL, THR_PANE1_LRROW, THR_PANE1_LRCOL, fg, bg);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
 
 	while(1)  {
+	
 		sprintf(str, "Process %d says %s\n", gettid(), text);
+//		mutex_acquire(frame_lock);
 		write(PANE1, str, strlen(str));
-		sleep(10);
+//		mutex_release(frame_lock);
+		
 	}
 }
 
-void outproc2(char *text, int fg, int pane) {
-	char *str = NULL;
+void outproc2(char *text, int fg, int bg, int pane) {
+	char str[25];
 	int count = 0; 
 	int fd = 0;
 
-	enable();
+//	enable();
 
-	str = (char *)memget(256);
+
 
 	if ((char *)SYSERR == str)
 		return;
@@ -271,31 +193,41 @@ void outproc2(char *text, int fg, int pane) {
 //	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
 	
 //	open(TTY1, PANE1);
-	open(PANE2, THR_PANE2_ULROW, THR_PANE2_ULCOL, THR_PANE2_LRROW, THR_PANE2_LRCOL, fg, CYAN);
+	open(PANE2, THR_PANE2_ULROW, THR_PANE2_ULCOL, THR_PANE2_LRROW, THR_PANE2_LRCOL, fg, bg);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+
+//	write(PANE2, SHELL_BANNER_PI3_NONVT100, strlen(SHELL_BANNER_PI3_NONVT100));
 
 	while(1)  {
 		sprintf(str, "Process %d says %s\n", gettid(), text);
+//		mutex_acquire(frame_lock);
 		write(PANE2, str, strlen(str));
-		sleep(10);
+//		mutex_release(frame_lock);
+		
 	}
 }
+
+
 
 void soutproc0() {
 //	open(PANE0, TTY1);
 
 	open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, WHITE, BLACK);
-	open(TTY1, PANE0);
-	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, PANE0, PANE0), RESCHED_NO);
-
+//	open(TTY1, PANE0);
+//	open(TTY1, KBDMON0);
+//	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, TTY1, TTY1), RESCHED_NO);
+	
+		
+	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, PANE0), RESCHED_NO);
 }
 
 void soutproc1() {
 //	open(PANE1, TTY1);
-
 	open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);
-	open(TTY1, PANE1);
-	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, PANE1, PANE1), RESCHED_NO);
+	
+	
+	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, PANE1, PANE1, PANE1), RESCHED_NO);
+	
 }
 
 
@@ -333,6 +265,7 @@ void openPanes(int num) {
 
 		
 		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
+		
 		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
 		
 		
@@ -345,13 +278,11 @@ void openPanes(int num) {
 		drawRect(THR_PANE1_ULCOL, THR_PANE1_ULROW, THR_PANE1_LRCOL, THR_PANE1_LRROW, LEAFGREEN);
 		drawRect(THR_PANE2_ULCOL, THR_PANE2_ULROW, THR_PANE2_LRCOL, THR_PANE2_LRROW, LEAFGREEN);
 */
-		kill(26);
+//		kill(26);
 
-		screenClear(BLACK);
-		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", MAGENTA, 1), RESCHED_YES);
-		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", CYAN, 1), RESCHED_YES);
+		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", BLUE, 1), RESCHED_YES);
+		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", GREEN, 1), RESCHED_YES);
 		ready(create((void *)outproc2, INITSTK, 10, "outproc2", 3, "CCC", ORANGE, 1), RESCHED_YES);
-
 	
 	}
 	else if (num == 4) {				
