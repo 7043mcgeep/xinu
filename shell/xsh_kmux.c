@@ -117,7 +117,7 @@ shellcmd xsh_kmux(int nargs, char *args[])
 
 
 void outproc0(char *text, int fg, int bg, int pane) {
-	char str[25];
+	char str[256];
 	int count = 0;
 	int fd = 0;
 	
@@ -131,13 +131,13 @@ void outproc0(char *text, int fg, int bg, int pane) {
 	fd = pane + 1;
 
 //	drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
-	
+		
 //	open(TTY1, PANE0);
 	open(PANE0, THR_PANE0_ULROW, THR_PANE0_ULCOL, THR_PANE0_LRROW, THR_PANE0_LRCOL, fg, bg);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, TTY1, TTY1), RESCHED_NO);
-
+//	sleep(10);
 	while(1) {
-		sprintf(str, "Process %d says %s jfaiowejfoawjefojawiofjoawijfoiaewjiofjowijfoiwjfoiajwoifjawiof\n", gettid(), text);
+		sprintf(str, "Process %d says %s for the %d time\n", gettid(), text, count++);
 //		mutex_acquire(frame_lock);
 		write(PANE0, str, strlen(str));
 //		mutex_release(frame_lock);
@@ -147,7 +147,7 @@ void outproc0(char *text, int fg, int bg, int pane) {
 }
 
 void outproc1(char *text, int fg, int bg, int pane) {
-	char str[25];
+	char str[256];
 	int count = 0; 
 	int fd = 0;
 
@@ -161,23 +161,25 @@ void outproc1(char *text, int fg, int bg, int pane) {
 	fd = pane + 1;
 		
 //	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
-	
+
 //	open(TTY1, PANE1);
 	open(PANE1, THR_PANE1_ULROW, THR_PANE1_ULCOL, THR_PANE1_LRROW, THR_PANE1_LRCOL, fg, bg);
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
-
+//	sleep(10);
 	while(1)  {
 	
-		sprintf(str, "Process %d says %s\n", gettid(), text);
+		sprintf(str, "Process %d says %s for the %d time\n", gettid(), text, count++);
 //		mutex_acquire(frame_lock);
 		write(PANE1, str, strlen(str));
 //		mutex_release(frame_lock);
+//		sleep(10);
+
 		
 	}
 }
 
 void outproc2(char *text, int fg, int bg, int pane) {
-	char str[25];
+	char str[256];
 	int count = 0; 
 	int fd = 0;
 
@@ -197,12 +199,14 @@ void outproc2(char *text, int fg, int bg, int pane) {
 //	ready(create(shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
 
 //	write(PANE2, SHELL_BANNER_PI3_NONVT100, strlen(SHELL_BANNER_PI3_NONVT100));
-
+//	sleep(10);
 	while(1)  {
-		sprintf(str, "Process %d says %s\n", gettid(), text);
+		sprintf(str, "Process %d says %s for the %d time\n", gettid(), text, count++);
 //		mutex_acquire(frame_lock);
 		write(PANE2, str, strlen(str));
 //		mutex_release(frame_lock);
+//		sleep(10);
+	
 		
 	}
 }
@@ -264,9 +268,9 @@ void openPanes(int num) {
 	
 
 		
-		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
-		
-		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
+		ready(create((void *)outproc0, INITSTK, 20, "outproc0", 3, "AAA", GREEN, 1), RESCHED_YES);
+		wait(10);
+		ready(create((void *)outproc1, INITSTK, 20, "outproc1", 3, "BBB", ORANGE, 1), RESCHED_YES);
 		
 		
 
