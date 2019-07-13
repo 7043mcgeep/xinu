@@ -19,7 +19,7 @@ C_FILES += unsleep.c wakeup.c
 C_FILES += udelay.c
 
 # Files for semaphores
-C_FILES += signal.c signaln.c wait.c semcreate.c semfree.c semcount.c
+C_FILES += signal.c signaln.c wait.c semcreate.c semfree.c semcount.c sreset.c
  
 # Files for monitors
 #C_FILES += moncreate.c monfree.c moncount.c lock.c unlock.c

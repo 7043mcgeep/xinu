@@ -19,7 +19,7 @@ devcall pRead(device *devptr, void *buf, int len) {
 	
 	/* setup and error check pointers to structures */
 	ppane = &panetab[devptr->minor];
-	phw = ppane->devptr;
+	phw = ppane->phw;
 	if (NULL == phw) {
 		return SYSERR;
 	}
@@ -63,6 +63,7 @@ devcall pRead(device *devptr, void *buf, int len) {
 	while ((ppane->icount < PANE_IBLEN) && !ppane->idelim) {
 		/* read character */
 		ch = (*phw->getc) (phw);
+//		kprintf("read: %c\r\n", ch);
 		if (SYSERR == ch) {
 			return SYSERR;
 		}		
@@ -175,5 +176,6 @@ static void paneEcho(device *devptr, char ch) {
 	}
 
 	/* echo character */
+	kprintf("read: %c\r\n", ch);
 	pPutc(devptr, ch);
 }

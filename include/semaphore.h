@@ -42,5 +42,5 @@ syscall signaln(semaphore, int);
 semaphore semcreate(int);
 syscall semfree(semaphore);
 syscall semcount(semaphore);
-
+syscall sreset(semaphore, int);
 #endif                          /* _SEMAPHORE_H */

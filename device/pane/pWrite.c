@@ -4,8 +4,8 @@
 
 #include <xinu.h>
 #include <device.h>
+#include <semaphore.h>
 #include <pane.h>
-
 static int writcopy(char *buf, struct pane *ppane, int avail, int len);
 
 
@@ -28,6 +28,7 @@ devcall pWrite(device *devptr, char *buf, int len) {
 
 	if (avail >= len) {
 		writcopy(buf, ppane, avail, len);
+	//	kprintf("buf: %s\r\n", buf);
 		/* Wake output process */
 		send(ppane->outprocid, len);
 	}
@@ -36,12 +37,14 @@ devcall pWrite(device *devptr, char *buf, int len) {
 
 		if (avail > 0) {
 			writcopy(buf, ppane, avail, len);
+	//		kprintf("buf: %s\r\n", buf);
 			/* wake output process */
 			send(ppane->outprocid, 0);
 			buf += avail;
 			len -= avail;
 		}
 		for ( ; len > 0; len--) {
+			kprintf("wait outsem: %d\r\n", semcount(ppane->p_outsem));
 			wait(ppane->p_outsem);
 			ppane->p_outbuf[ppane->p_otail++] = *buf++;
 			++ppane->p_ocount;
@@ -71,7 +74,15 @@ static int writcopy(char *buf, struct pane *ppane, int avail, int len) {
 
 	ppane->p_ocount += len;
 	ppane->p_otail = index;
-	signal(ppane->p_outsem);	
-
+	
+//	signal(ppane->p_outsem);
+/*		
+	struct sement *sptr;
+	sptr = &semtab[ppane->p_outsem];
+	sptr->count = (avail - len);	
+	kprintf("semcount: %d\r\n", semcount(ppane->p_outsem));
+	resched();
+*/
+	sreset(ppane->p_outsem, avail - len);
 	return OK;
 }

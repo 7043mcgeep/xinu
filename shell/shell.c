@@ -17,6 +17,7 @@
 #include <conf.h>
 #include <framebuffer.h>
 #include <clock.h>
+#include <pane.h>
 
 const struct centry commandtab[] = {
 #if NETHER
@@ -226,9 +227,38 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
 #endif
 	}
 
+/*
+#if defined(PANE0)
+	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+#endif
+
+#if defined(PANE1)
+	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+#endif
+
+#if defined(PANE2)	
+	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+#endif
+
+#if defined(PANE3)	
+	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+#endif
+*/
+
+
+#if defined(PANE1)
+	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+
+#else
         /* Setup proper tty modes for input and output */
         control(stdin, TTY_CTRL_CLR_IFLAG, TTY_IRAW, NULL);
         control(stdin, TTY_CTRL_SET_IFLAG, TTY_ECHO, NULL);
+#endif
 
         /* Read command */
         buflen = read(stdin, buf, SHELL_BUFLEN - 1);

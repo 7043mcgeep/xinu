@@ -51,12 +51,14 @@ int poutproc(struct pane *ppane) {
 
 			/* if buffer level below low water mark and no delayed signal waiting proc now */
 			if ( (count < (ppane->p_olimit - ppane->p_olowat) ) && (0 == ppane->p_odsend) ) {
+				kprintf("outsem: %d\r\n", semcount(ppane->p_outsem));
 				signal(ppane->p_outsem);
 			}
 			/* else delay signal until at least OBMINSP buffer slots are free */
 			else if ( ++(ppane->p_odsend) == ppane->p_olowat) {
 				while (ppane->p_odsend > 0) {
 					ppane->p_odsend--;
+					kprintf("outsem: %d\r\n", semcount(ppane->p_outsem));
 					signal(ppane->p_outsem);
 				}
 			}
@@ -70,13 +72,14 @@ int poutproc(struct pane *ppane) {
 					ppane->ul_row + ppane->cursrow + 1,
 					ppane->fg);
 			}
+//			ppane->curscol += CHAR_WIDTH;
 			ppane->curscol += CHAR_WIDTH;
 			if (ppane->curscol >= ppane->cols) {
 				ppane->curscol = 0;
 				ppane->cursrow++;
 			}
 			
-			if (ppane->cursrow >= ppane->rows - 15) {
+			if (ppane->cursrow >= ppane->rows - 15 - CHAR_HEIGHT) {
 				clearBackground(ppane);
 				ppane->cursrow = 0;
 			}

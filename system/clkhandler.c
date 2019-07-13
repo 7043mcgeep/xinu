@@ -35,7 +35,7 @@ interrupt clkhandler(void)
     {
         clktime++;
         clkticks = 0;
-   	kprintf(".");
+//   	kprintf(".");
 }
 
 	/* We do not have preemption yet.. this breaks the code.. */

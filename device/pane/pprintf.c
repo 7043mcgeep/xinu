@@ -10,7 +10,7 @@
 
 syscall pputc(char c, device *devptr) {
 	pPutc(devptr, c);
-	return (int)c;
+	return c;
 }
 
 syscall pgetc(device *devptr) {
@@ -18,10 +18,13 @@ syscall pgetc(device *devptr) {
 }
 
 syscall pprintf(char *fmt, ...) {
+//	struct pane *ppane;
+//	ppane = &panetab[devptr->minor];
 	va_list ap;
 	irqmask mask = disable();
 
 	va_start(ap, fmt);
+//	_doprnt(fmt, ap, (int (*)(int, int))pputc, (int)&devtab[ppane->devptr]);
 	_doprnt(fmt, ap, (int (*)(int, int))pputc, (int)&devtab[PANE1]);
 	va_end(ap);
 

@@ -17,9 +17,11 @@ devcall pOpen(device *devptr, va_list ap);
 devcall pClose(device *devptr);
 devcall pWrite(device *devptr, char *buf, int len);
 devcall pPutc(device *devptr, char ch);
-devcall pControl(device *devptr, int func, char *arg1, char *arg2);
+devcall pControl(device *devptr, int func, long arg1, long arg2);
 devcall pGetc(device *devptr);
 devcall pRead(device *devptr, void *buf, int len);
+syscall pprintf(char *fmt, ...);
+
 
 void spawnPane(void);							/* Create a pane and place it into the panetab */
 void killPane(char *name);							/* Remove a pane from the panetab */
@@ -42,6 +44,10 @@ void drawPanelName(char *name, int length);
 #define PANE_ECHO	0x10	/* echo input			*/
 #define PANE_IALL (PANE_IRAW | PANE_INCLR | PANE_IGNCR | PANE_ICRNL | PANE_ECHO)
 
+
+/* pControl() functions */
+#define PANE_CTRL_SET_IFLAG	0x20	/* set input flags	*/
+#define PANE_CTRL_CLR_IFLAG	0x21	/* clear input flags	*/
 
 struct pane {
 	device *devptr;		/* pane dev structure 		*/

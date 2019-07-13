@@ -11,6 +11,8 @@
 #include <thread.h>
 #include <version.h>
 #include <stdlib.h>
+#include <framebuffer.h>
+#include <pane.h>
 
 void print_os_info(void);
 
@@ -22,7 +24,8 @@ void print_os_info(void);
 thread main(void)
 {
 #if HAVE_SHELL
-	int shelldevs[4][3];
+//	int shelldevs[4][3];
+	int shelldevs[6][3];
 	uint nshells = 0;
 #endif
 
@@ -109,6 +112,32 @@ thread main(void)
 #warning "No TTY for SERIAL1"
 #endif
 #endif /* TTY1 */
+
+#if defined(TTY2)
+#if defined(PANE1)
+#if 0
+{
+	kprintf("TTY2 and PANE1 are defined\r\n");
+	uint result, result2;
+
+	/* open PANE0 */
+	result = open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);
+	kprintf("result of open(PANE1)=%d\r\n", result);
+	/* Associate TTY2 with PANE0 */
+//	result2 = open(TTY2, PANE1);
+//	kprintf("result of open(TTY2, PANE1)=%d\r\n", result2);
+
+	if (result == OK && result2 == OK)
+	{
+		shelldevs[nshells][0] = PANE1;
+		shelldevs[nshells][1] = PANE1;
+		shelldevs[nshells][2] = PANE1;
+		nshells++;
+	}
+}
+#endif
+#endif /* PANE1 */
+#endif /* TTY2  */
 
 	/* Start shells  */
 #if HAVE_SHELL

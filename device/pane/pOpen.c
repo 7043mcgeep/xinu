@@ -24,7 +24,7 @@ extern int poutproc(struct pane *ppane);
 devcall pOpen(device *devptr, va_list ap) {
 	int ulrow, ulcol, lrrow, lrcol, fg, bg;
 	int outpid = -1;
-	int dvnum = KBDMON0;
+	int dvnum = TTY1;
 	
 
 
@@ -97,7 +97,7 @@ devcall pOpen(device *devptr, va_list ap) {
 
 
 
-	ppane->p_olimit = ppane->cols;	/* buffer output limit is the length of one line of the pane */ 
+	ppane->p_olimit = ppane-> rows * ppane->cols;	/* buffer output limit is the length of one line of the pane */ 
 	ppane->p_outsem = semcreate(ppane->p_olimit);
 
 
@@ -131,6 +131,6 @@ devcall pOpen(device *devptr, va_list ap) {
 	}
 	
 	devptr = (device *)ppane;
-	return ppane;
+	return OK;
 
 }

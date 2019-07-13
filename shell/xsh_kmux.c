@@ -128,7 +128,7 @@ void outproc0(char *text, int fg, int bg, int pane) {
 	if ((char *)SYSERR == str)
 		return;
 
-	fd = pane + 1;
+
 
 //	drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
 		
@@ -141,7 +141,7 @@ void outproc0(char *text, int fg, int bg, int pane) {
 //		mutex_acquire(frame_lock);
 		write(PANE0, str, strlen(str));
 //		mutex_release(frame_lock);
-		
+		sleep(10);		
 	}
 
 }
@@ -149,8 +149,6 @@ void outproc0(char *text, int fg, int bg, int pane) {
 void outproc1(char *text, int fg, int bg, int pane) {
 	char str[256];
 	int count = 0; 
-	int fd = 0;
-
 //	enable();
 
 //	str = (char *)memget(256);
@@ -158,7 +156,7 @@ void outproc1(char *text, int fg, int bg, int pane) {
 	if ((char *)SYSERR == str)
 		return;
 
-	fd = pane + 1;
+
 		
 //	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
 
@@ -173,7 +171,7 @@ void outproc1(char *text, int fg, int bg, int pane) {
 		write(PANE1, str, strlen(str));
 //		mutex_release(frame_lock);
 //		sleep(10);
-
+		sleep(10);
 		
 	}
 }
@@ -181,7 +179,7 @@ void outproc1(char *text, int fg, int bg, int pane) {
 void outproc2(char *text, int fg, int bg, int pane) {
 	char str[256];
 	int count = 0; 
-	int fd = 0;
+
 
 //	enable();
 
@@ -190,7 +188,7 @@ void outproc2(char *text, int fg, int bg, int pane) {
 	if ((char *)SYSERR == str)
 		return;
 
-	fd = pane + 1;
+
 		
 //	drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
 	
@@ -206,7 +204,7 @@ void outproc2(char *text, int fg, int bg, int pane) {
 		write(PANE2, str, strlen(str));
 //		mutex_release(frame_lock);
 //		sleep(10);
-	
+		sleep(10);
 		
 	}
 }
@@ -214,24 +212,78 @@ void outproc2(char *text, int fg, int bg, int pane) {
 
 
 void soutproc0() {
-//	open(PANE0, TTY1);
-
 	open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, WHITE, BLACK);
+	open(TTY3, KBDMON0);
+	
+	char shell0[7] = "SHELL0";
+	char shell1[7] = "SHELL1";
+	int i;
+	struct thrent *thrptr;
+	for (i = 0; i < NTHREAD; i++) {
+		thrptr = &thrtab[i];
+		if ((strcmp(thrptr->name, shell0) == 0) || (strcmp(thrptr->name, shell1) == 0)) {
+			suspend(i);
+			kprintf("suspended: %d\r\n");
+		}
+	}
+		
+
+	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY3, PANE0, TTY3), RESCHED_YES);
+
+
+
+
+//	while (1) {
+//		write(PANE0, buf, strlen(buf));
+//	}
+
 //	open(TTY1, PANE0);
 //	open(TTY1, KBDMON0);
 //	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY1, TTY1, TTY1), RESCHED_NO);
 	
 		
-	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, PANE0), RESCHED_NO);
+	//ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, PANE0), RESCHED_NO);
 }
 
 void soutproc1() {
-//	open(PANE1, TTY1);
-	open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);
+	open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);	
+	open(TTY2, KBDMON0);
+//	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+//	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+//	((thrtab[thrcurrent[getcpuid()]]).fdesc[0]) = DEVNULL;	
+//	((thrtab[thrcurrent[getcpuid()]]).fdesc[1]) = DEVNULL;	
+
+	char shell0[7] = "SHELL0";
+	char shell1[7] = "SHELL1";
+	int i;
+	struct thrent *thrptr;
+	for (i = 0; i < NTHREAD; i++) {
+		thrptr = &thrtab[i];
+		if ((strcmp(thrptr->name, shell0) == 0)) {
+			suspend(i);
+			kprintf("suspended: %d\r\n");
+		}
+		if ((strcmp(thrptr->name, shell1) == 0)) {
+			suspend(i);
+		}
+	}
+		
+
+	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY2, PANE1, TTY2), RESCHED_YES);
+//	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+//	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+
+//	sleep(20000);
 	
-	
-	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, PANE1, PANE1, PANE1), RESCHED_NO);
-	
+	char pshell1[8] = "PSHELL1";
+
+	for (i = 0; i < NTHREAD; i++) {
+		thrptr = &thrtab[i];
+		if (strcmp(thrptr->name, pshell1) == 0) {
+			thrptr->fdesc[0] = NULL;
+		}
+	}
+
 }
 
 
@@ -242,7 +294,6 @@ void openPanes(int num) {
 /*
 		drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
 		drawRect(TWO_PANE1_ULCOL, TWO_PANE1_ULROW, TWO_PANE1_LRCOL, TWO_PANE1_LRROW, LEAFGREEN); 
-
 		if (OK == open(CONSOLE, TTY1)) {
 			
 			ready(create(shell, INITSTK, INITPRIO, "PANE1", 3, TTY1, TTY1, TTY1), RESCHED_NO);
@@ -266,11 +317,10 @@ void openPanes(int num) {
 //		open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, CYAN, BLACK);	
 //		open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, MAGENTA, BLACK);
 	
-
-		
-		ready(create((void *)outproc0, INITSTK, 20, "outproc0", 3, "AAA", GREEN, 1), RESCHED_YES);
-		wait(10);
-		ready(create((void *)outproc1, INITSTK, 20, "outproc1", 3, "BBB", ORANGE, 1), RESCHED_YES);
+		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
+		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
+//		ready(create((void *)soutproc0, INITSTK, 20, "outproc0", 0), RESCHED_YES);
+//		ready(create((void *)soutproc1, INITSTK, 20, "outproc1", 0), RESCHED_YES);
 		
 		
 
@@ -285,7 +335,9 @@ void openPanes(int num) {
 //		kill(26);
 
 		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", BLUE, 1), RESCHED_YES);
+//		sleep(10);
 		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", GREEN, 1), RESCHED_YES);
+//		sleep(10);
 		ready(create((void *)outproc2, INITSTK, 10, "outproc2", 3, "CCC", ORANGE, 1), RESCHED_YES);
 	
 	}

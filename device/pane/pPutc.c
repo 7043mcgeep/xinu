@@ -25,34 +25,32 @@ extern bool initalized;
  * @param  ch    character to write
  */
 devcall pPutc(device *devptr, char ch) {
-/*
-	if (devptr->init == TRUE) {
-		if (ch == '\n') {
-			cursor_row++;
-			cursor_col = 0;
-		}
-		else if (ch == '\t') {
-			cursor_col += 4;
-		}
-		drawChar(ch, cursor_col * CHAR_WIDTH, cursor_row * CHAR_HEIGHT, foreground);
-		cursor_col++;
-		if (cursor_col == cols) {
-			cursor_col = 0;
-			cursor_row += 1;
-		}
-		if ( (minishell == TRUE) && (cursor_row == rows) ) {
-			minishellClear(background);
-			cursor_row = rows - MINISHELLMINROW;
-		}
-		else if (cursor_row == rows) {
-			screenClear(background);
-			cursor_row = 0;
-		}
-		return (uchar)ch;
+	struct pane *ppane = NULL;
+	device *phw = NULL;
+
+	/* Setup and error check pointers to structures */
+	ppane = &panetab[devptr->minor];
+	phw = ppane->phw;
+	if (NULL == phw) {
+		return SYSERR;
 	}
-	return SYSERR;
-*/
-	return pWrite(devptr, ch, 1);
+
+	switch (ch) {
+		/* Newline */
+		case '\n':
+			if (SYSERR == (*phw->putc) (phw, '\r')) {
+				return SYSERR;
+			}	
+			break;
+		/* Carriage return */
+		case '\r':
+			ch = '\n';
+			break;
+	}
+
+//	return (*phw->putc) (phw, ch);
+//	kprintf("pPutc: %c\r\n", ch);	
+	return pWrite(devptr, &ch, 1);
 
 
 }
