@@ -21,13 +21,16 @@ devcall pControl(device *devptr, int func, long arg1, long arg2);
 devcall pGetc(device *devptr);
 devcall pRead(device *devptr, void *buf, int len);
 syscall pprintf(char *fmt, ...);
-
+int switchpane(void);
+int switchp(void);
+int setupPanes(void);
 
 void spawnPane(void);							/* Create a pane and place it into the panetab */
 void killPane(char *name);							/* Remove a pane from the panetab */
 void spawnFrame(void);							/* Spawn the frame shell process */
 void drawPane(int id, int width, int height, int posx, int posy);	/* Draw a pane on the screen */	
 void drawPanelName(char *name, int length);
+
 
 /* output definitions */
 #define OBLEN		256	/* output buffer size */
@@ -69,6 +72,9 @@ struct pane {
 	int fg;			/* pane foreground color 	*/
 	int bg;			/* pane background color 	*/
 
+	int hasFocus;		/* notion of window focus	*/
+	int switch_id;		/* tid of switch process	*/
+
 	/* output fields */
 	semaphore p_outsem;	/* output buffer space semaphor */
 	int p_ohead;		/* index of first character	*/
@@ -101,6 +107,7 @@ int pFree(struct pane *ppane);
 
 extern struct pane panetab[MAXPANES];
 extern int panecount;
+
 
 /* PANE locations */
 

@@ -10,6 +10,8 @@ static int writcopy(char *buf, struct pane *ppane, int avail, int len);
 
 
 devcall pWrite(device *devptr, char *buf, int len) {
+	//kprintf("buf: %s\r\n", buf);
+
 	struct pane *ppane = &panetab[devptr->minor];	
 
 	irqmask	im;
@@ -44,7 +46,7 @@ devcall pWrite(device *devptr, char *buf, int len) {
 			len -= avail;
 		}
 		for ( ; len > 0; len--) {
-			kprintf("wait outsem: %d\r\n", semcount(ppane->p_outsem));
+//			kprintf("wait outsem: %d\r\n", semcount(ppane->p_outsem));
 			wait(ppane->p_outsem);
 			ppane->p_outbuf[ppane->p_otail++] = *buf++;
 			++ppane->p_ocount;
@@ -84,5 +86,6 @@ static int writcopy(char *buf, struct pane *ppane, int avail, int len) {
 	resched();
 */
 	sreset(ppane->p_outsem, avail - len);
+//	kprintf("semcnt: %d\r\n", semcount(ppane->p_outsem));
 	return OK;
 }

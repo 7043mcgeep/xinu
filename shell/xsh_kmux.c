@@ -32,7 +32,7 @@
 void help(void);
 void openPanes(int);
 void closePanes(void);
-
+void switchPanes(void);
 
 /* testing */
 void outproc0(char *text, int fg, int bg, int pane);
@@ -43,7 +43,8 @@ void soutproc1(void);
 /* kmux built-in commands */
 struct defaultcommand builtInCommands[] = {
 	{"open", openPanes},
-	{"close", closePanes}
+	{"close", closePanes},
+	{"switch", switchPanes}
 	
 };
 
@@ -94,6 +95,12 @@ shellcmd xsh_kmux(int nargs, char *args[])
 			closePanes();
 			return OK;
 		}
+		
+		//switch command
+		else if ((0 == strcmp(tok[0], "switch")) && (ntok == 1)) {
+			switchp();
+			return OK;
+		}
 
 		//status command
 		else if ((0 == strcmp(tok[0], "status")) && (ntok == 1)) {
@@ -108,13 +115,16 @@ shellcmd xsh_kmux(int nargs, char *args[])
 		/* If we made it here, we have no idea what this command is. */
 		printf("Sorry, %s is not a recognized command. Check syntax and help menu.", tok[0]);
 
-		return OK;
+		continue;
 
 	}
 }
 
 
+void switchPanes(void) {
+	switchp();
 
+}
 
 void outproc0(char *text, int fg, int bg, int pane) {
 	char str[256];
@@ -213,12 +223,14 @@ void outproc2(char *text, int fg, int bg, int pane) {
 
 void soutproc0() {
 	open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, WHITE, BLACK);
-	open(TTY3, KBDMON0);
-	
+	open(TTY2, KBDMON0);
+
+/*	
 	char shell0[7] = "SHELL0";
 	char shell1[7] = "SHELL1";
 	int i;
 	struct thrent *thrptr;
+	
 	for (i = 0; i < NTHREAD; i++) {
 		thrptr = &thrtab[i];
 		if ((strcmp(thrptr->name, shell0) == 0) || (strcmp(thrptr->name, shell1) == 0)) {
@@ -226,9 +238,15 @@ void soutproc0() {
 			kprintf("suspended: %d\r\n");
 		}
 	}
+
+	*/
 		
 
-	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, TTY3, PANE0, TTY3), RESCHED_YES);
+//	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, TTY2), RESCHED_NO);
+	int shell_id;
+	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, TTY2);
+	sprintf(&thrtab[shell_id].name, "%s", "PSHELL0");
+	ready(shell_id, RESCHED_NO);
 
 
 
@@ -246,43 +264,54 @@ void soutproc0() {
 }
 
 void soutproc1() {
-	open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);	
-	open(TTY2, KBDMON0);
+	open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, WHITE, BLACK);
+	open(TTY3, KBDMON0);
+
 //	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+//
 //	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
 //	((thrtab[thrcurrent[getcpuid()]]).fdesc[0]) = DEVNULL;	
 //	((thrtab[thrcurrent[getcpuid()]]).fdesc[1]) = DEVNULL;	
 
+/*
 	char shell0[7] = "SHELL0";
 	char shell1[7] = "SHELL1";
+*/
 	int i;
 	struct thrent *thrptr;
+/*
 	for (i = 0; i < NTHREAD; i++) {
 		thrptr = &thrtab[i];
 		if ((strcmp(thrptr->name, shell0) == 0)) {
 			suspend(i);
-			kprintf("suspended: %d\r\n");
+			kprintf("suspended: %d\r\n", i);
 		}
 		if ((strcmp(thrptr->name, shell1) == 0)) {
 			suspend(i);
 		}
 	}
-		
+*/
+	int shell_id;
+	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, PANE1, PANE1, TTY3);
+	sprintf(&thrtab[shell_id].name, "%s", "PSHELL1");
+	ready(shell_id, RESCHED_NO);
 
-	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY2, PANE1, TTY2), RESCHED_YES);
+/*
+	udelay(1000);
+		
+	for (i = 0; i < NTHREAD; i++) {
+		thrptr = &thrtab[i];
+		if ((strcmp(thrptr->name, "PSHELL1") == 0)) {
+			suspend(i);
+		}	
+	}
+*/
+
+//	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, TTY3, PANE1, TTY3), RESCHED_NO);
 //	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
 //	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
 
 //	sleep(20000);
-	
-	char pshell1[8] = "PSHELL1";
-
-	for (i = 0; i < NTHREAD; i++) {
-		thrptr = &thrtab[i];
-		if (strcmp(thrptr->name, pshell1) == 0) {
-			thrptr->fdesc[0] = NULL;
-		}
-	}
 
 }
 
@@ -290,6 +319,8 @@ void soutproc1() {
 
 void openPanes(int num) {
 	if (num == 2) {
+
+		int switch_id;
 
 /*
 		drawRect(TWO_PANE0_ULCOL, TWO_PANE0_ULROW, TWO_PANE0_LRCOL, TWO_PANE0_LRROW, LEAFGREEN);	
@@ -317,8 +348,36 @@ void openPanes(int num) {
 //		open(PANE0, TWO_PANE0_ULROW, TWO_PANE0_ULCOL, TWO_PANE0_LRROW, TWO_PANE0_LRCOL, CYAN, BLACK);	
 //		open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, MAGENTA, BLACK);
 	
+//		ready(create((void *)switchpane, INITSTK, 20, "switchpane", 0), RESCHED_YES);
+		
+		char shell0[7] = "SHELL0";
+		char shell1[7] = "SHELL1";
+		int i;
+		struct thrent *thrptr;
+
+		for (i = 0; i < NTHREAD; i++) {
+			thrptr = &thrtab[i];
+			if ((strcmp(thrptr->name, shell0) == 0)) {
+			//	thrptr->prio = suspend(i);
+				suspend(i);
+				kprintf("suspended: %d\r\n", i);
+				continue;
+			}
+			if ((strcmp(thrptr->name, shell1) == 0)) {
+			//	thrptr->prio = suspend(i);
+				suspend(i);
+				kprintf("suspended: %d\r\n", i);
+			}
+		}
+
 		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
 		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
+		udelay(1000);
+		ready(create((void *)setupPanes, INITSTK, 20, "setupPanes", 0), RESCHED_YES);
+
+//		switch_id = create((void *)switchpane, INITSTK, 20, "switchpane", 0);
+//		ready(switch_id, RESCHED_YES);		
+
 //		ready(create((void *)soutproc0, INITSTK, 20, "outproc0", 0), RESCHED_YES);
 //		ready(create((void *)soutproc1, INITSTK, 20, "outproc1", 0), RESCHED_YES);
 		
@@ -348,9 +407,23 @@ void openPanes(int num) {
 		drawRect(FOR_PANE3_ULCOL, FOR_PANE3_ULROW, FOR_PANE3_LRCOL, FOR_PANE3_LRROW, LEAFGREEN);
 	}
 }
-
+	
 void closePanes() {
+	int i, j;
+	struct thrent *thrptr;
+	char name[8] = "PSHELL";
+	char proc[10] = "*PANEOUT*";
 
+	for (i = 0; i < MAXPANES; i++) {
+		if (panetab[i].state == PANE_USED) {
+			for (j = 0; j < NTHREAD; j++) {
+				thrptr = &thrtab[j];
+				if (strcmp(thrptr->name, name) == 0) {
+					kill(j);
+				}
+			}
+		}
+	}
 }
 
 

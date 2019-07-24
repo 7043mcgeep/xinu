@@ -5,7 +5,7 @@ COMP = device/pane
 
 # Source files for this component
 S_FILES =
-C_FILES = frame.c pane.c palloc.c pClose.c pInit.c pOpen.c pPutc.c pWrite.c poutproc.c pFree.c pControl.c pprintf.c pRead.c pGetc.c
+C_FILES = frame.c pane.c palloc.c pClose.c pInit.c pOpen.c pPutc.c pWrite.c poutproc.c pFree.c pControl.c pprintf.c pRead.c pGetc.c switchp.c setupPanes.c
 
 # Add the files to the compile source path
 DIR = ${TOPDIR}/${COMP}

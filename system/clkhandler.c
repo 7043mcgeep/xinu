@@ -35,8 +35,7 @@ interrupt clkhandler(void)
     {
         clktime++;
         clkticks = 0;
-//   	kprintf(".");
-}
+    }
 
 	/* We do not have preemption yet.. this breaks the code.. */
     /* If sleepq is not empty, decrement first key.   */

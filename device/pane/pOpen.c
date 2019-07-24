@@ -19,7 +19,7 @@ extern struct pane *palloc();
 extern int poutproc(struct pane *ppane);
 //extern int console_rows;
 //extern int console_cols;
-
+extern int listenerStarted;
 
 devcall pOpen(device *devptr, va_list ap) {
 	int ulrow, ulcol, lrrow, lrcol, fg, bg;
@@ -76,6 +76,12 @@ devcall pOpen(device *devptr, va_list ap) {
 	ppane->cursrow	= 0;
 	ppane->curscol	= 0;
 
+	ppane->hasFocus = FALSE;
+
+	/* from framebuffer */
+	cursor_row = ppane->cursrow;
+	cursor_col = ppane->curscol;
+
 	ppane->fg	= fg;
 	ppane->bg	= bg;
 
@@ -97,8 +103,9 @@ devcall pOpen(device *devptr, va_list ap) {
 
 
 
-	ppane->p_olimit = ppane-> rows * ppane->cols;	/* buffer output limit is the length of one line of the pane */ 
+	ppane->p_olimit = ppane->rows * ppane->cols;	/* buffer output limit is the length of one line of the pane */ 
 	ppane->p_outsem = semcreate(ppane->p_olimit);
+//	kprintf("start: %d\r\n", semcount(ppane->p_olimit));
 
 
 	
@@ -118,6 +125,16 @@ devcall pOpen(device *devptr, va_list ap) {
 	if ((unsigned char *)SYSERR == ppane->p_outbuf) {
 		return SYSERR;
 	}
+
+
+/*	if (listenerStarted == FALSE) {
+		ready(create((void *)switchpane, INITSTK, 20, "switchpane", 0), RESCHED_YES);
+		listenerStarted = TRUE;
+	}
+*/
+
+
+
 
 //	devptr = (device *)ppane;
 

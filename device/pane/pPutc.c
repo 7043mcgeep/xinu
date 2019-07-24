@@ -35,19 +35,22 @@ devcall pPutc(device *devptr, char ch) {
 		return SYSERR;
 	}
 
+/*
 	switch (ch) {
-		/* Newline */
+		// Newline 
 		case '\n':
-			if (SYSERR == (*phw->putc) (phw, '\r')) {
+			if (SYSERR == (*phw->putc) (phw, '\n')) {
 				return SYSERR;
-			}	
+			}
+			kprintf("pPutc: newline!\r\n");	
 			break;
-		/* Carriage return */
+		// Carriage return 
 		case '\r':
-			ch = '\n';
+			ch = '\r';
+			kprintf("pPutc: carriage return!\r\n");
 			break;
 	}
-
+*/
 //	return (*phw->putc) (phw, ch);
 //	kprintf("pPutc: %c\r\n", ch);	
 	return pWrite(devptr, &ch, 1);

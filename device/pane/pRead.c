@@ -108,7 +108,8 @@ devcall pRead(device *devptr, void *buf, int len) {
 			case 0x04:
 				ppane->ieof = TRUE;
 				ppane->idelim = TRUE;
-				break;
+				break;			
+
 			/* all other characters */
 			default:
 				/* ignore unprintable characters */
@@ -161,6 +162,10 @@ devcall pRead(device *devptr, void *buf, int len) {
  */
 
 static void paneEcho(device *devptr, char ch) {
+	struct pane *ppane;
+	ppane = &panetab[devptr->minor];
+
+
 	
 	/* backspace or delete */
 	if (('\b' == ch) || (0x7F == ch)) {
@@ -177,5 +182,5 @@ static void paneEcho(device *devptr, char ch) {
 
 	/* echo character */
 	kprintf("read: %c\r\n", ch);
-	pPutc(devptr, ch);
+	pPutc(ppane, ch);
 }
