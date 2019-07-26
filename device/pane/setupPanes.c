@@ -13,6 +13,37 @@ int setupPanes() {
 
 	struct thrent *thrptr;
 	char name[8] = "PSHELL";
+	char shell0[7] = "SHELL0";
+	char shell1[7] = "SHELL1";
+	irqmask im;
+
+
+	im = disable();
+
+
+	for (i = 0; i < NTHREAD; i++) {
+		thrptr = &thrtab[i];
+		if ((strcmp(thrptr->name, "SHELL0") == 0)) {
+			thrptr->fdesc[0] = NULL;
+			thrptr->fdesc[1] = NULL;
+			thrptr->fdesc[2] = NULL;
+			kprintf("suspended: %d\r\n", i);
+		}
+	
+		if ((strcmp(thrptr->name, "SHELL1") == 0)) {
+			thrptr->fdesc[0] = NULL;
+			thrptr->fdesc[1] = NULL;
+			thrptr->fdesc[2] = NULL;
+		
+			kprintf("suspended: %d\r\n", i);
+		}
+	
+	}
+
+	restore(im);
+
+
+
 
 
 	for (i = 0; i < MAXPANES; i++) {
@@ -25,7 +56,7 @@ int setupPanes() {
 	panetab[0].hasFocus = TRUE;
 
 
-	
+
 	/* suspending all panes not in focus */
 	for (i = 0; i < activeCount; i++) {
 		if (panetab[i].hasFocus == FALSE) {
@@ -34,8 +65,8 @@ int setupPanes() {
 			for (j = 0; j < NTHREAD; j++) {
 				thrptr = &thrtab[j];
 				if (strcmp(thrptr->name, name) == 0) {
-				//	thrptr->fdesc[0] = NULL;
-					suspend(j);	
+					panetab[i].canRead = FALSE;
+					restore(im);
 					break;
 				}
 			}
@@ -43,6 +74,5 @@ int setupPanes() {
 		} 
 	}
 	kprintf("setup done!\r\n");
-	return OK;
-	
+
 }

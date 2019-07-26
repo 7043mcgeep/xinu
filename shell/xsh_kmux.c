@@ -98,16 +98,17 @@ shellcmd xsh_kmux(int nargs, char *args[])
 		
 		//switch command
 		else if ((0 == strcmp(tok[0], "switch")) && (ntok == 1)) {
-			switchp();
+			switchPanes();
 			return OK;
 		}
 
 		//status command
 		else if ((0 == strcmp(tok[0], "status")) && (ntok == 1)) {
 			int i;
-			printf("ID\t|\tNAME\t|\tSTATE\n");
+			printf("ID\t|\tNAME\t|\tSTATE\t|\tFOCUS\r\n");
 			for (i = 0; i < MAXPANES; i++) {
-				printf("%d\t\t%s\t\t%d\n", panetab[i].id, panetab[i].name, panetab[i].state);
+				printf("%d\t\t%s\t\t%d\t\t%d\n", panetab[i].id, panetab[i].name, panetab[i].state,
+										panetab[i].hasFocus);
 			}
 			continue;
 		}
@@ -122,8 +123,9 @@ shellcmd xsh_kmux(int nargs, char *args[])
 
 
 void switchPanes(void) {
-	switchp();
-
+	int switchid = create(switchp, INITSTK, 150, "switchp", 0);
+	ready(switchid, RESCHED_YES);
+//	kill(switchid);
 }
 
 void outproc0(char *text, int fg, int bg, int pane) {
@@ -349,7 +351,7 @@ void openPanes(int num) {
 //		open(PANE1, TWO_PANE1_ULROW, TWO_PANE1_ULCOL, TWO_PANE1_LRROW, TWO_PANE1_LRCOL, MAGENTA, BLACK);
 	
 //		ready(create((void *)switchpane, INITSTK, 20, "switchpane", 0), RESCHED_YES);
-		
+	/*	
 		char shell0[7] = "SHELL0";
 		char shell1[7] = "SHELL1";
 		int i;
@@ -369,11 +371,11 @@ void openPanes(int num) {
 				kprintf("suspended: %d\r\n", i);
 			}
 		}
-
+*/
 		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
 		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
-		udelay(1000);
-		ready(create((void *)setupPanes, INITSTK, 20, "setupPanes", 0), RESCHED_YES);
+		udelay(2000);
+		ready(create(setupPanes, INITSTK, 50, "setupPanes", 0), RESCHED_YES);
 
 //		switch_id = create((void *)switchpane, INITSTK, 20, "switchpane", 0);
 //		ready(switch_id, RESCHED_YES);		

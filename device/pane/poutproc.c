@@ -91,9 +91,6 @@ int poutproc(struct pane *ppane) {
 
 //				updateCursor(ppane);
 			}
-			else if ('~' == c) {
-				send(ppane->switch_id, TRUE);
-			}
 			else {
 				drawChar(c, ppane->ul_col + ppane->curscol + 1,
 					ppane->ul_row + ppane->cursrow + 1,

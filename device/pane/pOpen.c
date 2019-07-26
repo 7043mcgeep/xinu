@@ -77,6 +77,7 @@ devcall pOpen(device *devptr, va_list ap) {
 	ppane->curscol	= 0;
 
 	ppane->hasFocus = FALSE;
+	ppane->canRead  = TRUE;
 
 	/* from framebuffer */
 	cursor_row = ppane->cursrow;

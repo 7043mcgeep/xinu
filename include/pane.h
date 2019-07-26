@@ -73,7 +73,7 @@ struct pane {
 	int bg;			/* pane background color 	*/
 
 	int hasFocus;		/* notion of window focus	*/
-	int switch_id;		/* tid of switch process	*/
+	int canRead;		/* canRead boolean 		*/
 
 	/* output fields */
 	semaphore p_outsem;	/* output buffer space semaphor */

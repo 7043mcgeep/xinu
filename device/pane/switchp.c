@@ -11,12 +11,12 @@
  #include <device.h>
  #include <thread.h>
  #include <pane.h>
-
+ #include <shell.h>
 
 int switchp() {
 	int activeCount = 0;
 	int i, j;
-
+	irqmask im;
 
 	/* Detecting active PANES */
 	for (i = 0; i < MAXPANES; i++) {
@@ -25,31 +25,9 @@ int switchp() {
 		}
 	}
 
-	/* PANE0 has focus by default */
-//	panetab[0].hasFocus = TRUE;
-
 	struct thrent *thrptr;
 	char name[8] = "PSHELL";
 
-/*
-	for (i = 0; i < activeCount; i++) {
-		if (panetab[i].hasFocus == FALSE) {
-			sprintf(name, "%s%d", name, i);
-			kprint("%s\r\n", name);
-			
-			for (j = 0; j < NTHREAD; j++) {
-				thrptr = &thrtab[j];
-				ow
-				if (strcmp(thrptr->name, name) == 0) {
-					suspend(j);
-					thrptr->fdesc[0] = DEVNULL;
-					thrptr->fdesc[1] = DEVNULL;
-					thrptr->fdesc[2] = DEVNULL;
-				}
-			}
-		}
-	}
-*/
 
 
 	for (i = 0; i < activeCount; i++) {
@@ -58,10 +36,13 @@ int switchp() {
 			
 			for (j = 0; j < NTHREAD; j++) {
 				thrptr = &thrtab[j];
+
 				if (strcmp(thrptr->name, name) == 0) {
-				//	thrptr->fdesc[0] = NULL;
-					suspend(j);
-				//	thrptr->fdesc[0] = NULL;  
+
+					im = disable();
+					panetab[i].canRead = FALSE;
+
+					restore(im);
 					kprintf("%s has lost focus\r\n", thrptr->name);
 				}
 			}
@@ -79,41 +60,34 @@ int switchp() {
 				thrptr = &thrtab[j];
 				
 				if (strcmp(thrptr->name, name) == 0) {
+					im = disable();
+	
 					switch (index) {
 						case 0:
-							
-						//	thrptr->fdesc[0] = PANE0;
-						//	thrptr->fdesc[1] = PANE0;
-						//	thrptr->fdesc[2] = TTY2;
-							resume(j);
+							//ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", PANE0, PANE0, TTY2), RESCHED_YES);
+							panetab[index].canRead = TRUE;
+							restore(im);
 							break;
 
 						case 1:
-						//	thrptr->fdesc[0] = PANE1;
-						//	thrptr->fdesc[1] = PANE1;
-						//	thrptr->fdesc[2] = TTY3;
-							resume(j);
-							kprintf("%s has gained focus\r\n", name);
+						//ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL1", PANE1, PANE1, TTY3), RESCHED_YES);
+							panetab[index].canRead = TRUE;
+							restore(im);
 							break;
 
 						case 2:
-						//	thrptr->fdesc[0] = PANE2;
-						//	thrptr->fdesc[1] = PANE2;
-						//	thrptr->fdesc[2] = TTY4;
-							resume(j);
+						restore(im);
 							break;
 
 						case 3:
-							thrptr->fdesc[0] = PANE3;
-						//	thrptr->fdesc[1] = PANE3;
-						//	thrptr->fdesc[2] = TTY5;
-							resume(j);
+						restore(im);
 							break;
 					}
+					
 				}
 			}
 		}
 	}
-	
+
 	return OK;
 }
