@@ -124,7 +124,7 @@ shellcmd xsh_kmux(int nargs, char *args[])
 
 void switchPanes(void) {
 	int switchid = create(switchp, INITSTK, 150, "switchp", 0);
-	ready(switchid, RESCHED_YES);
+	ready(switchid, RESCHED_YES, CORE_ZERO);
 //	kill(switchid);
 }
 
@@ -248,7 +248,7 @@ void soutproc0() {
 	int shell_id;
 	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 4, PANE0, PANE0, TTY2, PANE0);
 	sprintf(&thrtab[shell_id].name, "%s", "PSHELL0");
-	ready(shell_id, RESCHED_NO);
+	ready(shell_id, RESCHED_NO, CORE_ZERO);
 
 
 
@@ -296,7 +296,7 @@ void soutproc1() {
 	int shell_id;
 	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 4, PANE1, PANE1, TTY3, PANE1);
 	sprintf(&thrtab[shell_id].name, "%s", "PSHELL1");
-	ready(shell_id, RESCHED_NO);
+	ready(shell_id, RESCHED_NO, CORE_ZERO);
 
 /*
 	udelay(1000);
@@ -372,10 +372,10 @@ void openPanes(int num) {
 			}
 		}
 */
-		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES);
-		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES);
+		ready(create((void *)soutproc0, INITSTK, 20, "soutproc0", 0), RESCHED_YES, CORE_ZERO);
+		ready(create((void *)soutproc1, INITSTK, 20, "soutproc1", 0), RESCHED_YES, CORE_ZERO);
 		udelay(2000);
-		ready(create(setupPanes, INITSTK, 50, "setupPanes", 0), RESCHED_YES);
+		ready(create(setupPanes, INITSTK, 50, "setupPanes", 0), RESCHED_YES, CORE_ZERO);
 
 //		switch_id = create((void *)switchpane, INITSTK, 20, "switchpane", 0);
 //		ready(switch_id, RESCHED_YES);		
@@ -395,11 +395,11 @@ void openPanes(int num) {
 */
 //		kill(26);
 
-		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", BLUE, 1), RESCHED_YES);
+		ready(create((void *)outproc0, INITSTK, 10, "outproc0", 3, "AAA", BLUE, 1), RESCHED_YES, CORE_ZERO);
 //		sleep(10);
-		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", GREEN, 1), RESCHED_YES);
+		ready(create((void *)outproc1, INITSTK, 10, "outproc1", 3, "BBB", GREEN, 1), RESCHED_YES, CORE_ZERO);
 //		sleep(10);
-		ready(create((void *)outproc2, INITSTK, 10, "outproc2", 3, "CCC", ORANGE, 1), RESCHED_YES);
+		ready(create((void *)outproc2, INITSTK, 10, "outproc2", 3, "CCC", ORANGE, 1), RESCHED_YES, CORE_ZERO);
 	
 	}
 	else if (num == 4) {				

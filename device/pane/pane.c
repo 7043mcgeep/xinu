@@ -70,14 +70,14 @@ void spawnPane() {
 					
 					screenInit();
 					drawPane(1, DEFAULT_WIDTH/2, DEFAULT_HEIGHT-1, 0, 0);	/* Left pane */
-					ready(create(shell, INITSTK, INITPRIO, name, 3, TTY1, TTY1, TTY1), RESCHED_NO);
+					ready(create(shell, INITSTK, INITPRIO, name, 3, TTY1, TTY1, TTY1), RESCHED_NO, CORE_ZERO);
 					drawPanelName(name, sizeof(name)/sizeof(char));
 				}
 				if (panecount == 2) {	
 				
 					screenInit();
 					drawPane(2, DEFAULT_WIDTH/2, DEFAULT_HEIGHT-1, DEFAULT_WIDTH-1, DEFAULT_WIDTH);
-					ready(create(shell, INITSTK, INITPRIO, name, 3, TTY1, TTY1, TTY1), RESCHED_NO);
+					ready(create(shell, INITSTK, INITPRIO, name, 3, TTY1, TTY1, TTY1), RESCHED_NO, CORE_ZERO);
 					drawPanelName(name, sizeof(name)/sizeof(char));
 				}
 			}
@@ -171,7 +171,7 @@ void spawnFrame() {
 	panetab[0] = frame;
 
 	screenInit();
-	ready(create(shell, INITSTK, INITPRIO, name, 3, TTY1, TTY1, TTY1), RESCHED_NO);
+	ready(create(shell, INITSTK, INITPRIO, name, 3, TTY1, TTY1, TTY1), RESCHED_NO, CORE_ZERO);
 
 	drawPanelName(name, sizeof(name)/sizeof(char));
 

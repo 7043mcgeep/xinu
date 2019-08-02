@@ -8,8 +8,6 @@
 #include <stdarg.h>
 #include <mutex.h>
 
-mutex_t serial_lock;
-
 /**
  * @ingroup uartgeneric
  *
@@ -29,7 +27,7 @@ syscall kprintf(const char *format, ...)
 {
     int retval;
     va_list ap;
-
+    
     va_start(ap, format);
 
     mutex_acquire(serial_lock);

@@ -18,6 +18,7 @@
 #include <framebuffer.h>
 #include <clock.h>
 #include <pane.h>
+#include <core.h>
 
 const struct centry commandtab[] = {
 #if NETHER
@@ -29,7 +30,7 @@ const struct centry commandtab[] = {
     {"dumptlb", FALSE, xsh_dumptlb},
 #endif
 #if NETHER
-    //{"ethstat", FALSE, xsh_ethstat},
+    {"ethstat", FALSE, xsh_ethstat},
 #endif
     {"exit", TRUE, xsh_exit},
 #if NFLASH
@@ -66,15 +67,15 @@ const struct centry commandtab[] = {
     {"ps", FALSE, xsh_ps},
 #if NETHER
     {"ping", FALSE, xsh_ping},
-    //{"pktgen", FALSE, xsh_pktgen},
+    {"pktgen", FALSE, xsh_pktgen},
 #endif
 
 #ifdef _XINU_PLATFORM_ARM_RPI_3_
-//XXX	{"random", TRUE, xsh_random},
+    {"random", TRUE, xsh_random},
 #endif
 
 #if NETHER
-	{"rdate", FALSE, xsh_rdate},
+    {"rdate", FALSE, xsh_rdate},
 #endif
     {"reset", FALSE, xsh_reset},
 #if NETHER
@@ -85,21 +86,21 @@ const struct centry commandtab[] = {
     {"snoop", FALSE, xsh_snoop},
 #endif
 #if USE_TAR
-//    {"tar", FALSE, xsh_tar},
+    {"tar", FALSE, xsh_tar},
 #endif
 #if NETHER
     {"tcpstat", FALSE, xsh_tcpstat},
-    //XXX{"telnet", FALSE, xsh_telnet},
-    //XXX{"telnetserver", FALSE, xsh_telnetserver},
+    {"telnet", FALSE, xsh_telnet},
+    {"telnetserver", FALSE, xsh_telnetserver},
 #endif
-//XXX    {"test", FALSE, xsh_test},
+    {"test", FALSE, xsh_test},
 #if HAVE_TESTSUITE
     {"testsuite", TRUE, xsh_testsuite},
 #endif
 #if NETHER
-    //XXX{"timeserver", FALSE, xsh_timeserver},
+    {"timeserver", FALSE, xsh_timeserver},
 #endif
-#if FRAMEBUF
+#if TTY1
     {"turtle", FALSE, xsh_turtle},
 #endif
 #if NUART
@@ -113,15 +114,16 @@ const struct centry commandtab[] = {
 #endif
 #if NETHER
     {"udpstat", FALSE, xsh_udpstat},
-    //XXX{"vlanstat", FALSE, xsh_vlanstat},
-    //XXX{"voip", FALSE, xsh_voip},
-    //XXX{"xweb", FALSE, xsh_xweb},
+    {"vlanstat", FALSE, xsh_vlanstat},
+    {"voip", FALSE, xsh_voip},
+    {"xweb", FALSE, xsh_xweb},
 #endif
     {"?", FALSE, xsh_help}
 };
 
 ulong ncommand = sizeof(commandtab) / sizeof(struct centry);
-//XXXextern ulong foreground;
+
+bool using_framebuf = FALSE;
 
 /**
  * @ingroup shell
@@ -188,30 +190,22 @@ thread shell(int indescrp, int outdescrp, int errdescrp, device *devptr)
     stdout = outdescrp;
     stderr = errdescrp;
 
-    /* Print shell banner to framebuffer, if exists */
-#if defined(FRAMEBUF)
-    if (indescrp == FRAMEBUF)
-    {
-        foreground = CYAN;
-        printf(SHELL_BANNER_PI3_NONVT100);
-        foreground = LEAFGREEN;
-        printf(SHELL_START);
+    if (indescrp == TTY1){
+	    led_init();
+	    led_on();
+	    using_framebuf = TRUE;
     }
-    else
-#endif
-    {
-        foreground = CYAN;
-        printf(SHELL_BANNER_PI3_NONVT100);
-	udelay(250);
-        foreground = LEAFGREEN;
-        printf(SHELL_START);
-    }
+
+    /* Print shell banner
+     * If the frame buffer is being used (TTY1) instead of the terminal (CONSOLE),
+     * fbPutc() will parse the ANSI color code and change the foregroud color accordingly. */
+    printf(SHELL_BANNER_PI3);
+    printf(SHELL_START);
 
     /* Continually receive and handle commands */
     
     do {
   
-
 #if defined(FRAMEBUF)
      
     /* Print shell with colors over the frame buffer */
@@ -226,6 +220,7 @@ thread shell(int indescrp, int outdescrp, int errdescrp, device *devptr)
    
         if (NULL != hostptr)
         {
+
 #ifndef FRAMEBUF
         printf("@%s$ \033[0;39m", hostptr);
 #else
@@ -241,27 +236,7 @@ thread shell(int indescrp, int outdescrp, int errdescrp, device *devptr)
 #endif
     }
 
-/*
-#if defined(PANE0)
-    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
-#endif
 
-#if defined(PANE1)
-    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
-#endif
-
-#if defined(PANE2)	
-    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
-#endif
-
-#if defined(PANE3)	
-    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
-#endif
-*/
 
         /* Setup proper tty modes for input and output */
         control(stdin, TTY_CTRL_CLR_IFLAG, TTY_IRAW, NULL);
@@ -432,7 +407,7 @@ thread shell(int indescrp, int outdescrp, int errdescrp, device *devptr)
         {
             /* Make background thread ready, but don't reschedule */
             im = disable();
-            ready(child, RESCHED_NO);
+            ready(child, RESCHED_NO, CORE_ZERO);
             restore(im);
         }
         else
@@ -440,7 +415,7 @@ thread shell(int indescrp, int outdescrp, int errdescrp, device *devptr)
             /* Clear waiting message; Reschedule; */
             while (recvclr() != NOMSG);
             im = disable();
-            ready(child, RESCHED_YES);
+            ready(child, RESCHED_YES, CORE_ZERO);
             restore(im);
 
             /* Wait for command thread to finish */

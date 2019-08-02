@@ -1,7 +1,7 @@
 #include <kernel.h>
 #include <thread.h>
 #include <semaphore.h>
-
+#include <core.h>
 syscall sreset(semaphore sem, int count) {
 	struct sement *sptr;
 	int pid;
@@ -16,7 +16,7 @@ syscall sreset(semaphore sem, int count) {
 	sptr = &semtab[sem];
 	while (nonempty(sptr->queue)) {
 		pid = getfirst(sptr->queue);
-		ready(pid, RESCHED_NO);
+		ready(pid, RESCHED_NO, CORE_ZERO);
 	}
 	sptr->count = count;
 	resched();

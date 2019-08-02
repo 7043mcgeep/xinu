@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <framebuffer.h>
 #include <pane.h>
+#include <core.h>
+#include "platforms/arm-rpi3/mmu.h"
 
 void print_os_info(void);
 
@@ -34,24 +36,26 @@ thread main(void)
 	/* Print information about the operating system  */
 	print_os_info();
 
-	        /* Open all ethernet devices */
+	/* Open all ethernet devices */
 #if NETHER
-		struct ether *ethptr;
-		ushort i;
-		for (i = 0; i < NETHER; i++)
+	struct ether *ethptr;
+	ushort i;
+	int result;
+	for (i = 0; i < NETHER; i++)
+	{
+		ethptr = &ethertab[ethertab[i].dev->minor];
+		result = open(ethertab[i].dev->num);
+		if (SYSERR == result)
 		{
-			ethptr = &ethertab[ethertab[i].dev->minor];
-			if (SYSERR == open(ethertab[i].dev->num))
-			{
-				kprintf("[\t\033[1;31mFAILED\033[0;39m\t]\tFailed to open device %s\r\n",
-						ethertab[i].dev->name);
-			}
-			else if(ETH_STATE_UP == ethptr->state)
-			{
-				printf("[\t\033[1;32mOK\033[0;39m\t]\tOpened device %s\r\n",
-						ethertab[i].dev->name);
-			}
+			kprintf("[    \033[1;31mERROR\033[0;39m    ] Failed to open %s\r\n",
+					ethertab[i].dev->name);
 		}
+		else if(ETH_STATE_UP == ethptr->state)
+		{
+			kprintf("[    \033[1;32mOK\033[0;39m    ] Successfully opened %s\r\n",
+					ethertab[i].dev->name);
+		}
+	}
 #endif  /* NETHER */
 
 	/* Set up the first TTY (CONSOLE)  */
@@ -153,6 +157,7 @@ thread main(void)
 
 		for (i = 0; i < nshells; i++)
 		{
+			/* Create and ready thread on core zero */
 			sprintf(name, "SHELL%u", i);
 			if (SYSERR == ready(create
 						(shell, INITSTK, INITPRIO, name, 4,
@@ -161,7 +166,8 @@ thread main(void)
 						 shelldevs[i][2],
 						 shelldevs[i][3], 
 						 TRUE),
-						RESCHED_NO))
+						RESCHED_NO,
+						CORE_ZERO));
 			{
 				kprintf("WARNING: Failed to create %s", name);
 			}
@@ -189,6 +195,8 @@ void print_os_info(void)
 	kprintf("           [0x%08X to 0x%08X]\r\n",
 			(ulong)platform.minaddr, (ulong)(platform.maxaddr - 1));
 
+	/* Output available data cache */
+	kprintf("%10d kilobytes L1 data cache.\r\n", platform.dcache_size);
 
 	kprintf("%10d bytes reserved system area.\r\n",
 			(ulong)_start - (ulong)platform.minaddr);

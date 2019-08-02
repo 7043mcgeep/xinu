@@ -145,7 +145,7 @@ devcall pOpen(device *devptr, va_list ap) {
 		kprintf("Cannot create pane output process.\n");
 	} else {
 		ppane->outprocid = outpid;
-		ready(outpid, RESCHED_NO);
+		ready(outpid, RESCHED_NO, CORE_ZERO);
 	}
 	
 	devptr = (device *)ppane;

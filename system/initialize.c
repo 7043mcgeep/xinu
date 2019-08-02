@@ -9,12 +9,16 @@
 #include <xinu.h>
 #include <platform.h>
 #include <stdint.h>
+#include <mutex.h>
 
 #ifdef WITH_USB
 #include <usb_subsystem.h>
 #include <usb_core_driver.h>
 #include "../device/lan7800/lan7800.h"
 #endif
+
+#include "platforms/arm-rpi3/mmu.h"
+#include <dma_buf.h>
 
 /* Function prototypes */
 extern thread main(void);       /* main is the first thread created    */
@@ -32,7 +36,8 @@ struct bfpentry bfptab[NPOOL];  /* List of memory buffer pools    */
 mutex_t quetab_mutex;
 mutex_t thrtab_mutex[NTHREAD];
 mutex_t semtab_mutex[NSEM];
-unsigned int core_affinity[NTHREAD];
+
+mutex_t serial_lock;
 
 static void core_nulluser(void);
 
@@ -75,11 +80,10 @@ void nulluser(void)
 	enable();	
 
 	/* Spawn the main thread  */
-	ready(create(main, INITSTK, INITPRIO, "MAIN", 0), RESCHED_YES);
+	ready(create(main, INITSTK, INITPRIO, "MAIN", 0), RESCHED_YES, CORE_ZERO);
 
 	/* null thread has nothing else to do but cannot exit  */
 	while (TRUE){}
-
 }
 
 /**
@@ -91,6 +95,9 @@ static int sysinit(void)
 	int i;
 	struct thrent *thrptr;      /* thread control block pointer  */
 	struct memblock *pmblock;   /* memory block pointer          */
+
+	/* Initialize serial lock */
+	serial_lock = mutex_create();
 
 	/* Initialize system variables */
 	/* Count this NULLTHREAD as the first thread in the system. */
@@ -121,7 +128,8 @@ static int sysinit(void)
 	thrptr->stkptr = 0;
 	thrptr->memlist.next = NULL;
 	thrptr->memlist.length = 0;
-	thrcurrent[0] = NULLTHREAD;
+	thrptr->core_affinity = CORE_ZERO;
+	thrcurrent[CORE_ZERO] = NULLTHREAD;
 
 	/* Core 1 NULLTHREAD */
 	thrptr = &thrtab[NULLTHREAD1];
@@ -133,7 +141,8 @@ static int sysinit(void)
 	thrptr->stkptr = 0;
 	thrptr->memlist.next = NULL;
 	thrptr->memlist.length = 0;
-	thrcurrent[1] = NULLTHREAD1;
+	thrptr->core_affinity = CORE_ONE;
+	thrcurrent[CORE_ONE] = NULLTHREAD1;
 
 	/* Core 2 NULLTHREAD */
 	thrptr = &thrtab[NULLTHREAD2];
@@ -145,7 +154,8 @@ static int sysinit(void)
 	thrptr->stkptr = 0;
 	thrptr->memlist.next = NULL;
 	thrptr->memlist.length = 0;
-	thrcurrent[2] = NULLTHREAD2;
+	thrptr->core_affinity = CORE_TWO;
+	thrcurrent[CORE_TWO] = NULLTHREAD2;
 
 	/* Core 3 NULLTHREAD */
 	thrptr = &thrtab[NULLTHREAD3];
@@ -157,7 +167,8 @@ static int sysinit(void)
 	thrptr->stkptr = 0;
 	thrptr->memlist.next = NULL;
 	thrptr->memlist.length = 0;
-	thrcurrent[3] = NULLTHREAD3;	
+	thrptr->core_affinity = CORE_THREE;
+	thrcurrent[CORE_THREE] = NULLTHREAD3;	
 
 	/* Initialize semaphores */
 	for (i = 0; i < NSEM; i++)

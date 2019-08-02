@@ -13,7 +13,28 @@
 
 
 extern volatile unsigned int mbox[36];
-int mbox_call(unsigned char);
+extern bool screen_initialized;
+
+/* Boolean for whether the frame buffer is being used (TTY1) 
+ * Initialized in main.c */
+extern bool using_framebuf;
+
+/* Define states for color codes (escape sequence) */
+#define STANDARD	0
+#define ESCAPE		1
+#define BRKT		2
+#define FEATURE		3
+#define SEMI		4
+#define CL1		5
+#define CL2		6
+#define MODE		7
+#define CHANGE_COLOR	8
+
+extern uint fb_esc_color1;
+extern uint fb_esc_color2;
+extern uint fb_icolor;
+extern uint fb_state;
+extern uint ret_ct;
 
 #define MMIO_BASE       0x3F000000
 #define VIDEOCORE_MBOX  (MMIO_BASE+0x0000B880)
@@ -33,13 +54,9 @@ int mbox_call(unsigned char);
 #define MAILBOX_EMPTY 0x40000000 // set bit in status register if nothing to read from mailbox
 #define MMIO_BASE 0x3F000000 // base address for peripherals
 
-#define MAILBOX_CHANNEL_MASK 0xF // framebuffer uses channel 1; no reason to mess around with anything else
 #define MAILBOX_CH_PROPERTY 8
 #define MAILBOX_BASE 0xB880 // base address for mailbox registers
 #define MBOX_REQUEST 0
-//#define MAILBOX_READ   0x0  // the register we read from
-//#define MAILBOX_WRITE  0x8  // the register we write to
-//#define MAILBOX_STATUS 0x6  // the status register
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 12
 
