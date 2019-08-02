@@ -21,24 +21,24 @@ int setupPanes() {
 	im = disable();
 
 
-	for (i = 0; i < NTHREAD; i++) {
-		thrptr = &thrtab[i];
-		if ((strcmp(thrptr->name, "SHELL0") == 0)) {
-			thrptr->fdesc[0] = NULL;
-			thrptr->fdesc[1] = NULL;
-			thrptr->fdesc[2] = NULL;
-			kprintf("suspended: %d\r\n", i);
-		}
+	// for (i = 0; i < NTHREAD; i++) {
+	// 	thrptr = &thrtab[i];
+	// 	if ((strcmp(thrptr->name, "SHELL0") == 0)) {
+	// 		thrptr->fdesc[0] = NULL;
+	// 		thrptr->fdesc[1] = NULL;
+	// 		thrptr->fdesc[2] = NULL;
+	// 		kprintf("suspended: %d\r\n", i);
+	// 	}
 	
-		if ((strcmp(thrptr->name, "SHELL1") == 0)) {
-			thrptr->fdesc[0] = NULL;
-			thrptr->fdesc[1] = NULL;
-			thrptr->fdesc[2] = NULL;
+	// 	if ((strcmp(thrptr->name, "SHELL1") == 0)) {
+	// 		thrptr->fdesc[0] = NULL;
+	// 		thrptr->fdesc[1] = NULL;
+	// 		thrptr->fdesc[2] = NULL;
 		
-			kprintf("suspended: %d\r\n", i);
-		}
+	// 		kprintf("suspended: %d\r\n", i);
+	// 	}
 	
-	}
+	// }
 
 	restore(im);
 

@@ -130,7 +130,7 @@ ulong ncommand = sizeof(commandtab) / sizeof(struct centry);
  * @param descrp descriptor of device on which the shell is open
  * @return OK for successful exit, SYSERR for unrecoverable error
  */
-thread shell(int indescrp, int outdescrp, int errdescrp)
+thread shell(int indescrp, int outdescrp, int errdescrp, device *devptr)
 {
     char buf[SHELL_BUFLEN];     /* line input buffer        */
     short buflen;               /* length of line input     */
@@ -144,6 +144,16 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
     ushort i, j;                /* temp variables           */
     irqmask im;                 /* interrupt mask state     */
     char *hostptr = NULL;       /* pointer to hostname      */
+
+    struct pane *ppane;		    /* pointer to pane device   */ 
+   
+
+    //kprintf("devptr: %d\r\n", devptr);
+    //kprintf("null: %d\r\n", NULL);
+    if (devptr != DEVNULL) {
+    	ppane = &panetab[devptr->minor];
+    }
+
 
     /* Setup buffer for string for nvramGet call for hostname */
 #if defined(ETH0) && NVRAM
@@ -198,54 +208,58 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
     }
 
     /* Continually receive and handle commands */
-    while (TRUE)
-    {
-	#if defined(FRAMEBUF)
-	    /* Print shell with colors over the frame buffer */
-	    foreground = RASPBERRY;
-            printf(SHELL_PROMPT_FB);
-	    foreground = WHITE;
-        #else
-	    /* Display prompt using standard ANSI terminal coloring */
-            printf(SHELL_PROMPT);
-	#endif
+    
+    do {
+  
 
+#if defined(FRAMEBUF)
+     
+    /* Print shell with colors over the frame buffer */
+    foreground = RASPBERRY;
+        printf(SHELL_PROMPT_FB);
+    foreground = WHITE;
+    #else
+    /* Display prompt using standard ANSI terminal coloring */
+        printf(SHELL_PROMPT);
+#endif
+
+   
         if (NULL != hostptr)
         {
 #ifndef FRAMEBUF
-	    printf("@%s$ \033[0;39m", hostptr);
+        printf("@%s$ \033[0;39m", hostptr);
 #else
-	    printf("@%s$ ", hostptr);
+        printf("@%s$ ", hostptr);
 #endif
-	}
+    }
         else
         {
 #ifndef FRAMEBUF
-	    printf("$ \033[0;39m");
+        printf("$ \033[0;39m");
 #else
             printf("$ ");
 #endif
-	}
+    }
 
 /*
 #if defined(PANE0)
-	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
 #endif
 
 #if defined(PANE1)
-	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
 #endif
 
 #if defined(PANE2)	
-	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
 #endif
 
 #if defined(PANE3)	
-	control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
-	control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
+    control(stdin, PANE_CTRL_CLR_IFLAG, PANE_IRAW, NULL);
+    control(stdin, PANE_CTRL_SET_IFLAG, PANE_ECHO, NULL);
 #endif
 */
 
@@ -381,8 +395,8 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
         /* Spawn child thread for non-built-in commands */
         child =
             create(commandtab[i].procedure,
-                   SHELL_CMDSTK, SHELL_CMDPRIO,
-                   commandtab[i].name, 2, ntok, tok);
+                SHELL_CMDSTK, SHELL_CMDPRIO,
+                commandtab[i].name, 2, ntok, tok);
 
         /* Ensure child command thread was created successfully */
         if (SYSERR == child)
@@ -391,7 +405,7 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
             continue;
         }
 
-		thrtab_acquire(child);
+        thrtab_acquire(child);
 
         /* Set file descriptors for newly created thread */
         if (NULL == inname)
@@ -412,7 +426,7 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
         }
         thrtab[child].fdesc[2] = stderr;
 
-		thrtab_release(child);
+        thrtab_release(child);
 
         if (background)
         {
@@ -432,11 +446,30 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
             /* Wait for command thread to finish */
             while (receive() != child);
 #ifndef _XINU_PLATFORM_ARM_RPI_3_ 	/* sleeps for 10 seconds on the RPI 3... not desirable */
-	    				/* maybe needed for other platforms.. not sure */
+                        /* maybe needed for other platforms.. not sure */
             sleep(10);
 #endif
         }
-    }
+
+        //kprintf("ppane->canRead: %d\r\n", ppane->canRead);
+
+        switch((int)devptr) {
+            case DEVNULL:
+                /* do nothing and proceed through loop*/
+                //kprintf("DEVNULL");
+                break;
+            default:
+                if (!ppane->hasFocus) {
+                    //kprintf("pane: %d, hasFocus: %d\r\n", devptr->minor, ppane->hasFocus);
+                    continue;
+                }
+                break;
+
+        } 
+
+
+        
+    } while (TRUE); //|| ppane->canRead == TRUE) && !(ppane == NULL || ppane->canRead == FALSE));
 
     /* Close shell */
     fprintf(stdout, SHELL_EXIT);

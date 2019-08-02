@@ -17,12 +17,14 @@ devcall pGetc(device *devptr) {
 
 	result = pRead(ppane, &ch, 1);
 
-
 	if (1 != result) {
 		return result;
 	}
 
 
 	return ch;
+
+
+	
 
 }

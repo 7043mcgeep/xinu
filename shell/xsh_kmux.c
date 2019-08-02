@@ -246,7 +246,7 @@ void soutproc0() {
 
 //	ready(create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, TTY2), RESCHED_NO);
 	int shell_id;
-	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 3, PANE0, PANE0, TTY2);
+	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL0", 4, PANE0, PANE0, TTY2, PANE0);
 	sprintf(&thrtab[shell_id].name, "%s", "PSHELL0");
 	ready(shell_id, RESCHED_NO);
 
@@ -294,7 +294,7 @@ void soutproc1() {
 	}
 */
 	int shell_id;
-	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 3, PANE1, PANE1, TTY3);
+	shell_id = create((void *)shell, INITSTK, INITPRIO, "PSHELL1", 4, PANE1, PANE1, TTY3, PANE1);
 	sprintf(&thrtab[shell_id].name, "%s", "PSHELL1");
 	ready(shell_id, RESCHED_NO);
 

@@ -21,13 +21,12 @@ devcall pRead(device *devptr, void *buf, int len) {
 	/* setup and error check pointers to structures */
 	ppane = &panetab[devptr->minor];
 	phw = ppane->phw;
-
+	
 	if (NULL == phw) {
 		return SYSERR;
 	}
 
-	if (ppane->canRead) {
-
+//	if (ppane->hasFocus) {
 		/* if the eof flag is set, clear the flag and return EOF */
 		if (ppane->ieof) {
 			ppane->ieof = FALSE;
@@ -53,10 +52,12 @@ devcall pRead(device *devptr, void *buf, int len) {
 				*buffer++ = ch;
 				count++;
 
+				paneEcho(devptr, ch);
+
 				/* echo character if PANE_ECHO flag is set */
-				if (ppane->iflags & PANE_ECHO) {
-					paneEcho(devptr, ch);
-				}
+				// if (ppane->iflags & PANE_ECHO) {
+				// 	paneEcho(devptr, ch);
+				// }
 			}
 
 			return count;
@@ -67,6 +68,8 @@ devcall pRead(device *devptr, void *buf, int len) {
 		while ((ppane->icount < PANE_IBLEN) && !ppane->idelim) {
 			/* read character */
 			ch = (*phw->getc) (phw);
+
+
 	//		kprintf("read: %c\r\n", ch);
 			if (SYSERR == ch) {
 				return SYSERR;
@@ -157,7 +160,8 @@ devcall pRead(device *devptr, void *buf, int len) {
 		}
 
 		return count;
-	}
+//	}
+	
 }
 
 /**
@@ -167,11 +171,6 @@ devcall pRead(device *devptr, void *buf, int len) {
  */
 
 static void paneEcho(device *devptr, char ch) {
-	struct pane *ppane;
-	ppane = &panetab[devptr->minor];
-
-
-	
 	/* backspace or delete */
 	if (('\b' == ch) || (0x7F == ch)) {
 		pPutc(devptr, '\b');
@@ -181,11 +180,10 @@ static void paneEcho(device *devptr, char ch) {
 	}
 
 	/* do not echo unprintable characters */
-	if (!isprint(ch)) {
-		return;
-	}
+	// if (!isprint(ch)) {
+	// 	return;
+	// }
 
 	/* echo character */
-	kprintf("read: %c\r\n", ch);
-	pPutc(ppane, ch);
+	pPutc(devptr, ch);
 }

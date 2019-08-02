@@ -23,10 +23,12 @@ void print_os_info(void);
  */
 thread main(void)
 {
+
 #if HAVE_SHELL
 //	int shelldevs[4][3];
-	int shelldevs[6][3];
+	int shelldevs[4][4];
 	uint nshells = 0;
+	
 #endif
 
 	/* Print information about the operating system  */
@@ -60,6 +62,7 @@ thread main(void)
 		shelldevs[nshells][0] = CONSOLE;
 		shelldevs[nshells][1] = CONSOLE;
 		shelldevs[nshells][2] = CONSOLE;
+		shelldevs[nshells][3] = DEVNULL;
 		nshells++;
 #endif
 	}
@@ -82,7 +85,9 @@ thread main(void)
 		shelldevs[nshells][0] = TTY1;
 		shelldevs[nshells][1] = TTY1;
 		shelldevs[nshells][2] = TTY1;
+		shelldevs[nshells][3] = DEVNULL;
 		nshells++;
+		
 #endif
 	}
 	else
@@ -97,6 +102,7 @@ thread main(void)
 		shelldevs[nshells][0] = TTY1;
 		shelldevs[nshells][1] = TTY1;
 		shelldevs[nshells][2] = TTY1;
+		shelldevs[nshells][3] = DEVNULL;
 		nshells++;
 #endif
 	}
@@ -149,10 +155,12 @@ thread main(void)
 		{
 			sprintf(name, "SHELL%u", i);
 			if (SYSERR == ready(create
-						(shell, INITSTK, INITPRIO, name, 3,
+						(shell, INITSTK, INITPRIO, name, 4,
 						 shelldevs[i][0],
 						 shelldevs[i][1],
-						 shelldevs[i][2]),
+						 shelldevs[i][2],
+						 shelldevs[i][3], 
+						 TRUE),
 						RESCHED_NO))
 			{
 				kprintf("WARNING: Failed to create %s", name);

@@ -41,12 +41,15 @@ int switchp() {
 
 					im = disable();
 					panetab[i].canRead = FALSE;
+					panetab[i].hasFocus = FALSE;
 
 					restore(im);
 					kprintf("%s has lost focus\r\n", thrptr->name);
+					break;
+					
 				}
 			}
-			panetab[i].hasFocus = FALSE;
+			
 			continue;
 		} 
 		else {

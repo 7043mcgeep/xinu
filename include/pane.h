@@ -12,7 +12,6 @@
 #define PANEPRIO 100	/* priority of poutproc */
 
 int pInit(device *devptr);
-//int pFree(struct pane *ppane);
 devcall pOpen(device *devptr, va_list ap);
 devcall pClose(device *devptr);
 devcall pWrite(device *devptr, char *buf, int len);
@@ -100,13 +99,11 @@ struct pane {
 
 #define PANE_FREE	0
 #define	PANE_USED	1
-#define PANE_NULL	2	/* Used when creating the NULL pane for default use of fbPutc when kmux is not */
-				/* being used */
-				/* Number of used panes */
-int pFree(struct pane *ppane);
-
+#define PANE_NULL	2	
+			
 extern struct pane panetab[MAXPANES];
-extern int panecount;
+
+int pFree(struct pane *ppane);
 
 
 /* PANE locations */

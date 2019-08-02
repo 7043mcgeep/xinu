@@ -9,6 +9,7 @@
 
 #include <stddef.h>
 #include <conf.h>
+#include <device.h>
 
 /* Size contstants */
 #define SHELL_BUFLEN  160       /**< length of general buffer           */
@@ -97,7 +98,7 @@ extern const struct centry commandtab[];
 extern ulong ncommand;               /**< number of commands in table   */
 
 /* Function prototypes */
-thread shell(int, int, int);
+thread shell(int, int, int, device *devptr);
 short lexan(char *, ushort, char *, char *[]);
 shellcmd xsh_arp(int, char *[]);
 shellcmd xsh_clear(int, char *[]);
