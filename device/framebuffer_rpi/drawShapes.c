@@ -6,6 +6,7 @@
 /* Embedded Xinu, Copyright (C) 2013.  All rights reserved. */
 
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <framebuffer.h>
 
@@ -15,8 +16,7 @@
 #include <bcm2835.h>
 #endif
 
-extern void _inval_area(void *);
-extern void _flush_area(void *);
+extern void _inval_area(uint32_t);
 
 /** 
  * @ingroup framebuffer
@@ -42,7 +42,7 @@ void drawPixel(int x, int y, ulong color)
         dmb();
 	*address = color;
         dmb();
-	_inval_area(address);
+	_inval_area((uint32_t)address);
         dmb();
     }
 }

@@ -61,7 +61,7 @@ void mmu_init()
 	}
 
 	// make dma buffer area non-cacheable
-	mmu_section(dma_buf_space, dma_buf_space, 0x0);
+	mmu_section((uint) dma_buf_space, (uint) dma_buf_space, 0x0);
 
 	start_mmu(MMUTABLEBASE);
 }

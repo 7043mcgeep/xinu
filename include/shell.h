@@ -70,7 +70,7 @@ struct getopt
 };
 int getopt(int, char **, char *, struct getopt *);
 
-extern const struct centry commandtab[];
+extern struct centry commandtab[];
                                      /**< table of commands             */
 extern ulong ncommand;               /**< number of commands in table   */
 

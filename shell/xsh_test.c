@@ -53,7 +53,7 @@ void printQueue(qid_typ q)
 	tail = quetail(q);
 	while (next != tail)
 	{
-		kprintf("[%d : %d,%d : %d]\r\n", quetab[next].prev, next, quetab[next].key, quetab[next].next);
+		printf("[%d : %d,%d : %d]\r\n", quetab[next].prev, next, quetab[next].key, quetab[next].next);
 		next = quetab[next].next;
 	}
 }
@@ -94,21 +94,22 @@ void printpcb(int pid)
 
 shellcmd xsh_test(int nargs, char *args[])
 {
-	int c, pid;
-	int pids[12];
+	int c=0, pid=0;
 
-	kprintf("0) Test creation of one process\r\n");
-	kprintf("1) Test passing of many args\r\n");
-	kprintf("2) Create three processes and run them\r\n");
-	kprintf("3) Create three processes and run them on other cores\r\n");
-	kprintf("4) Single-core Priority Scheduling\r\n");
-	kprintf("5) Multicore Priority Scheduling (RESCHED_YES)\r\n");
-	kprintf("6) Multicore Priority Scheduling (RESCHED_NO)\r\n");
+	printf("0) Test creation of one process\r\n");
+	printf("1) Test passing of many args\r\n");
+	printf("2) Create three processes and run them\r\n");
+	printf("3) Create three processes and run them on other cores\r\n");
+	printf("4) Single-core Priority Scheduling\r\n");
+	printf("5) Multicore Priority Scheduling (RESCHED_YES)\r\n");
+	printf("6) Multicore Priority Scheduling (RESCHED_NO)\r\n");
 
 	printf("===TEST BEGIN===\r\n");
 
 	// TODO: Test your operating system!
 
+	//device *devptr;
+	//devptr = (device *)&devtab[SERIAL0];
 	c = getc(CONSOLE);
 	switch (c)
 	{
@@ -199,6 +200,6 @@ shellcmd xsh_test(int nargs, char *args[])
 			break;
 	}
 
-	kprintf("\r\n===TEST END===\r\n");
-	return;
+	printf("\r\n===TEST END===\r\n");
+	return OK;
 }

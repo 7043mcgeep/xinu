@@ -21,6 +21,7 @@
 #include <string.h>
 #include <kernel.h>
 #include "../system/platforms/arm-rpi3/bcm2837.h"
+#include <dma_buf.h>
 
 bool lan7800_isattached = 0;
 

@@ -19,7 +19,7 @@
 #include <clock.h>
 #include <core.h>
 
-const struct centry commandtab[] = {
+struct centry commandtab[] = {
 #if NETHER
     {"arp", FALSE, xsh_arp},
 #endif
@@ -174,6 +174,20 @@ thread shell(int indescrp, int outdescrp, int errdescrp)
     stdout = outdescrp;
     stderr = errdescrp;
 
+    /* If indescrp is CONSOLE (not TTY1/framebuffer), then remove the turtle command from
+     * the command table. Note: removal requires commandtab to be non-constant */
+    int idx = 0;
+    if(indescrp == CONSOLE){
+        for(int i = 0; i < ncommand; i++){ // Find turtle location in the command table
+    	    if(strcmp(commandtab[i].name, "turtle") == 0){
+		idx = i;
+	    	break;
+	    }
+        } // Remove it
+	for(int j = idx; j < ncommand - 1; j++){
+		commandtab[j] = commandtab[j+1];
+	}
+    }
 
     /* Print shell banner
      * If the frame buffer is being used (TTY1) instead of the terminal (CONSOLE),
